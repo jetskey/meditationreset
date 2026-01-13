@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function CompletePage() {
   // Capture timestamp on mount to avoid hydration mismatch
@@ -25,9 +26,12 @@ export default function CompletePage() {
   return (
     <main style={styles.container}>
       <h1 style={styles.title}>Session complete.</h1>
-      <p style={styles.subtitle}>You can return tomorrow.</p>
 
       {timestamp && <span style={styles.timestamp}>{timestamp}</span>}
+
+      <Link href="/session" style={styles.link}>
+        Start another session
+      </Link>
     </main>
   );
 }
@@ -53,9 +57,14 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#666',
     marginBottom: '2rem',
   },
-  // Timestamp is subdued - just for reference, not emphasis
   timestamp: {
     fontSize: '0.8125rem',
     color: '#999',
+    marginBottom: '2rem',
+  },
+  link: {
+    fontSize: '0.9375rem',
+    color: '#666',
+    textDecoration: 'none',
   },
 };
