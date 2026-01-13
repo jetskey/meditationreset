@@ -6,13 +6,11 @@ import { useRouter } from 'next/navigation';
 // Fixed 6-minute session duration
 const SESSION_DURATION = 6 * 60; // 360 seconds
 
-// Path to the guided meditation audio file
+// Path to the guided meditation audio file (served from /public/audio/)
 const AUDIO_PATH = '/audio/daily-focus-reset.mp3';
 
 /**
  * Guidance array - visual backup for the audio experience.
- * Each entry has a `start` time (seconds) when it becomes active.
- * The guidance remains visible until the next entry's start time.
  */
 const GUIDANCE = [
   { start: 0,   text: "Sit still. Let the body settle." },
@@ -38,29 +36,50 @@ export default function SessionPage() {
 
   const startTimeRef = useRef<number | null>(null);
   const endTimeRef = useRef<number | null>(null);
+
+  // Audio element ref
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize audio element on mount
-  useEffect(() => {
+  /**
+   * Clear audio error state
+   */
+  const clearAudioError = useCallback(() => {
+    setAudioError(null);
+  }, []);
+
+  /**
+   * Initialize audio element and attach event listeners
+   */
+  const initAudio = useCallback(() => {
+    if (audioRef.current) return audioRef.current;
+
     const audio = new Audio(AUDIO_PATH);
-    audio.loop = true; // Loop in case audio is shorter than session
+    audio.loop = true;
     audio.volume = volume;
     audioRef.current = audio;
 
-    // Handle audio errors (e.g., file not found)
-    audio.addEventListener('error', () => {
-      setAudioError('Add /public/audio/daily-focus-reset.mp3 to enable voice guidance.');
-    });
-
-    // Cleanup on unmount: stop audio
-    return () => {
-      audio.pause();
-      audio.src = '';
-      audioRef.current = null;
+    // Listen for errors
+    audio.onerror = () => {
+      const code = audio.error?.code;
+      const message = audio.error?.message || 'Unknown error';
+      setAudioError(`Audio error (code ${code}): ${message}`);
     };
-  }, []);
 
-  // Sync volume changes to audio element
+    // Clear error when audio is ready
+    audio.oncanplay = () => {
+      clearAudioError();
+    };
+
+    // Sync playing state
+    audio.onplay = () => setIsPlaying(true);
+    audio.onpause = () => setIsPlaying(false);
+
+    return audio;
+  }, [volume, clearAudioError]);
+
+  /**
+   * Sync volume changes to audio element
+   */
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -89,30 +108,46 @@ export default function SessionPage() {
   };
 
   /**
+   * Stop audio playback and reset position.
+   */
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  }, []);
+
+  /**
    * Start the session.
-   * Audio must be started in direct response to user interaction
+   * Audio.play() is called directly inside this click handler (user gesture)
    * to satisfy browser autoplay policies.
    */
-  const handleStart = useCallback(async () => {
+  const handleBegin = useCallback(async () => {
     const now = Date.now();
     startTimeRef.current = now;
     endTimeRef.current = now + SESSION_DURATION * 1000;
     setTimeRemaining(SESSION_DURATION);
     setGuidanceText(GUIDANCE[0].text);
     setIsRunning(true);
+    clearAudioError();
 
-    // Attempt to play audio
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      try {
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } catch (err) {
-        // Autoplay blocked or other error
-        setAudioError('Tap play to start audio guidance.');
+    // Create or get audio element
+    const audio = initAudio();
+    audio.volume = 0.8;
+    audio.currentTime = 0;
+
+    // Play audio - must be in direct response to user gesture
+    try {
+      const p = audio.play();
+      if (p !== undefined) {
+        await p;
       }
+    } catch (err: unknown) {
+      const error = err as Error;
+      setAudioError(`${error.name}: ${error.message}`);
     }
-  }, []);
+  }, [initAudio, clearAudioError]);
 
   /**
    * Toggle play/pause for the audio.
@@ -122,28 +157,16 @@ export default function SessionPage() {
 
     if (isPlaying) {
       audioRef.current.pause();
-      setIsPlaying(false);
     } else {
       try {
         await audioRef.current.play();
-        setIsPlaying(true);
-        setAudioError(null); // Clear any previous error
-      } catch {
-        setAudioError('Unable to play audio.');
+        clearAudioError();
+      } catch (err: unknown) {
+        const error = err as Error;
+        setAudioError(`${error.name}: ${error.message}`);
       }
     }
-  }, [isPlaying]);
-
-  /**
-   * Stop audio playback completely.
-   */
-  const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-    }
-  }, []);
+  }, [isPlaying, clearAudioError]);
 
   // Main loop: updates timer and guidance text every 100ms
   useEffect(() => {
@@ -167,12 +190,16 @@ export default function SessionPage() {
     return () => clearInterval(interval);
   }, [isRunning, router, getGuidanceForTime, stopAudio]);
 
-  // Cleanup audio on unmount (safety net)
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
-      stopAudio();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
     };
-  }, [stopAudio]);
+  }, []);
 
   return (
     <main style={styles.container}>
@@ -187,11 +214,22 @@ export default function SessionPage() {
         {/* Pre-session state */}
         {!isRunning && (
           <div style={styles.startArea}>
-            <button style={styles.beginButton} onClick={handleStart}>
+            <button style={styles.beginButton} onClick={handleBegin}>
               Begin
             </button>
             <span style={styles.durationLabel}>6 minutes</span>
-            {/* Show audio error/warning if file is missing */}
+
+            {/* Test audio link for debugging */}
+            <a
+              href={AUDIO_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.testAudioLink}
+            >
+              Test audio file
+            </a>
+
+            {/* Show audio error if present */}
             {audioError && (
               <span style={styles.audioWarning}>{audioError}</span>
             )}
@@ -213,13 +251,11 @@ export default function SessionPage() {
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
-                  // Pause icon
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="6" y="4" width="4" height="16" rx="1" />
                     <rect x="14" y="4" width="4" height="16" rx="1" />
                   </svg>
                 ) : (
-                  // Play icon
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" />
                   </svg>
@@ -239,7 +275,7 @@ export default function SessionPage() {
               />
             </div>
 
-            {/* Audio warning if playback failed */}
+            {/* Audio error during session */}
             {audioError && (
               <span style={styles.audioWarningActive}>{audioError}</span>
             )}
@@ -313,15 +349,21 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(255,255,255,0.4)',
   },
 
+  testAudioLink: {
+    fontSize: '0.75rem',
+    color: 'rgba(255,255,255,0.3)',
+    textDecoration: 'underline',
+    marginTop: '0.5rem',
+  },
+
   audioWarning: {
     fontSize: '0.75rem',
-    color: 'rgba(255,200,150,0.7)',
-    maxWidth: '280px',
+    color: 'rgba(255,200,150,0.8)',
+    maxWidth: '300px',
     textAlign: 'center',
     marginTop: '0.5rem',
   },
 
-  // Guidance text - secondary to voice, but still visible
   guidance: {
     maxWidth: '500px',
     fontSize: '1.5rem',
@@ -334,7 +376,6 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '2rem',
   },
 
-  // Audio controls container
   audioControls: {
     display: 'flex',
     alignItems: 'center',
@@ -365,9 +406,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     color: 'rgba(255,200,150,0.8)',
     marginTop: '1rem',
+    maxWidth: '300px',
+    textAlign: 'center',
   },
 
-  // Timer - subtle, secondary
   timer: {
     position: 'absolute',
     bottom: '2.5rem',
