@@ -3,58 +3,52 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Duration options in minutes
-const DURATION_OPTIONS = [6, 10, 15];
+// Fixed 6-minute session duration
+const SESSION_DURATION = 6 * 60; // 360 seconds
 
-// Guidance cues - psychologically framed, not spiritual
-// Each cue appears at the specified second and remains until the next cue
-const GUIDANCE_CUES = [
-  { start: 0, text: "Sit still. Let the body settle." },
-  { start: 20, text: "Close your eyes if they aren't already." },
-  { start: 40, text: "Notice the body as a collection of sensations." },
-  { start: 70, text: "You are observing these sensations." },
-  { start: 100, text: "Notice thoughts as they arise." },
-  { start: 130, text: "They are events. Not commands." },
-  { start: 160, text: "You are not the body." },
-  { start: 200, text: "You are not the thoughts." },
-  { start: 240, text: "You are the one noticing." },
-  { start: 280, text: "Rest in this noticing." },
-  { start: 320, text: "You are not the body." },
-  { start: 360, text: "You are not the thoughts." },
-  { start: 400, text: "You are the awareness itself." },
-  { start: 450, text: "Continue observing." },
-  { start: 500, text: "You are not the body." },
-  { start: 540, text: "You are not the thoughts." },
-  { start: 580, text: "Remain here." },
-  { start: 650, text: "You are not the body." },
-  { start: 700, text: "You are not the thoughts." },
-  { start: 750, text: "Stay with the stillness." },
-  { start: 820, text: "The session is ending soon." },
-  { start: 870, text: "Slowly return." },
+/**
+ * Guidance array - the core meditation content.
+ * Each entry has a `start` time (seconds) when it becomes active.
+ * The guidance remains visible until the next entry's start time.
+ *
+ * 7 cues across 360 seconds = ~50 seconds per cue.
+ * Mantra-style structure with psychological framing.
+ */
+const GUIDANCE = [
+  { start: 0,   text: "Sit still. Let the body settle." },
+  { start: 50,  text: "Notice the body as sensations." },
+  { start: 100, text: "You are not the body." },
+  { start: 155, text: "Notice thoughts as they appear." },
+  { start: 210, text: "You are not the thoughts." },
+  { start: 265, text: "You are the one observing." },
+  { start: 320, text: "Remain here until the session ends." },
 ];
 
 export default function SessionPage() {
   const router = useRouter();
 
-  const [duration, setDuration] = useState(6); // minutes
   const [isRunning, setIsRunning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [currentCue, setCurrentCue] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(SESSION_DURATION);
+  const [guidanceText, setGuidanceText] = useState(GUIDANCE[0].text);
 
   const startTimeRef = useRef<number | null>(null);
   const endTimeRef = useRef<number | null>(null);
 
-  // Find the appropriate guidance cue for the current elapsed time
-  const getCueForTime = useCallback((elapsedSeconds: number): string => {
-    let activeCue = GUIDANCE_CUES[0].text;
-    for (const cue of GUIDANCE_CUES) {
-      if (elapsedSeconds >= cue.start) {
-        activeCue = cue.text;
+  /**
+   * Selects the active guidance based on elapsed time.
+   * Iterates through the array and returns the text of the last
+   * entry whose `start` time has been reached.
+   */
+  const getGuidanceForTime = useCallback((elapsedSeconds: number): string => {
+    let activeText = GUIDANCE[0].text;
+    for (const entry of GUIDANCE) {
+      if (elapsedSeconds >= entry.start) {
+        activeText = entry.text;
       } else {
-        break;
+        break; // Entries are sorted, so we can exit early
       }
     }
-    return activeCue;
+    return activeText;
   }, []);
 
   const formatTime = (seconds: number): string => {
@@ -64,16 +58,15 @@ export default function SessionPage() {
   };
 
   const handleStart = useCallback(() => {
-    const durationMs = duration * 60 * 1000;
     const now = Date.now();
     startTimeRef.current = now;
-    endTimeRef.current = now + durationMs;
-    setTimeRemaining(duration * 60);
-    setCurrentCue(GUIDANCE_CUES[0].text);
+    endTimeRef.current = now + SESSION_DURATION * 1000;
+    setTimeRemaining(SESSION_DURATION);
+    setGuidanceText(GUIDANCE[0].text);
     setIsRunning(true);
-  }, [duration]);
+  }, []);
 
-  // Main timer and guidance loop
+  // Main loop: updates timer and guidance text every 100ms
   useEffect(() => {
     if (!isRunning || !startTimeRef.current || !endTimeRef.current) return;
 
@@ -83,7 +76,7 @@ export default function SessionPage() {
       const remaining = Math.max(0, Math.ceil((endTimeRef.current! - now) / 1000));
 
       setTimeRemaining(remaining);
-      setCurrentCue(getCueForTime(elapsed));
+      setGuidanceText(getGuidanceForTime(elapsed));
 
       if (remaining <= 0) {
         clearInterval(interval);
@@ -92,52 +85,35 @@ export default function SessionPage() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isRunning, router, getCueForTime]);
+  }, [isRunning, router, getGuidanceForTime]);
 
   return (
     <main style={styles.container}>
-      {/* Subtle gradient overlay for depth */}
-      <div style={styles.gradientOverlay} />
+      {/* Background gradient for depth */}
+      <div style={styles.gradient} />
 
-      {/* Content layer */}
+      {/* Content */}
       <div style={styles.content}>
-        {/* Title - always visible but understated */}
+        {/* Title - small, top of screen */}
         <span style={styles.title}>Daily Focus Reset</span>
 
-        {/* Pre-session: duration selector and begin button */}
+        {/* Pre-session state */}
         {!isRunning && (
-          <div style={styles.startContainer}>
-            {/* Duration selector - minimal pills */}
-            <div style={styles.durationSelector}>
-              {DURATION_OPTIONS.map((mins) => (
-                <button
-                  key={mins}
-                  onClick={() => setDuration(mins)}
-                  style={{
-                    ...styles.durationOption,
-                    backgroundColor: duration === mins ? 'rgba(255,255,255,0.15)' : 'transparent',
-                    color: duration === mins ? '#fff' : 'rgba(255,255,255,0.5)',
-                  }}
-                >
-                  {mins} min
-                </button>
-              ))}
-            </div>
-
-            {/* Primary CTA */}
+          <div style={styles.startArea}>
             <button style={styles.beginButton} onClick={handleStart}>
               Begin
             </button>
+            <span style={styles.durationLabel}>6 minutes</span>
           </div>
         )}
 
-        {/* During session: guidance text + timer */}
+        {/*
+          During session: guidance text is ALWAYS visible.
+          This is the primary experience - large, centered, readable.
+        */}
         {isRunning && (
           <>
-            {/* Guidance text - the heart of the experience */}
-            <p style={styles.guidance}>{currentCue}</p>
-
-            {/* Timer - present but secondary */}
+            <p style={styles.guidance}>{guidanceText}</p>
             <span style={styles.timer}>{formatTime(timeRemaining)}</span>
           </>
         )}
@@ -154,11 +130,10 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
 
-  // Subtle radial gradient for depth and containment
-  gradientOverlay: {
+  gradient: {
     position: 'absolute',
     inset: 0,
-    background: 'radial-gradient(ellipse at center, rgba(30,32,40,0.8) 0%, rgba(10,10,12,1) 70%)',
+    background: 'radial-gradient(ellipse at center, rgba(30,32,40,0.7) 0%, rgba(10,10,12,1) 70%)',
     pointerEvents: 'none',
   },
 
@@ -176,33 +151,18 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     position: 'absolute',
     top: '2.5rem',
-    fontSize: '0.8125rem',
+    fontSize: '0.75rem',
     fontWeight: 500,
-    color: 'rgba(255,255,255,0.4)',
-    letterSpacing: '0.05em',
+    color: 'rgba(255,255,255,0.35)',
+    letterSpacing: '0.08em',
     textTransform: 'uppercase',
   },
 
-  startContainer: {
+  startArea: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '2rem',
-  },
-
-  durationSelector: {
-    display: 'flex',
-    gap: '0.5rem',
-  },
-
-  durationOption: {
-    padding: '0.5rem 1rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    border: '1px solid rgba(255,255,255,0.15)',
-    borderRadius: '100px',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
+    gap: '1.25rem',
   },
 
   beginButton: {
@@ -217,24 +177,31 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: '0.02em',
   },
 
-  // Guidance text - large, readable, the primary focus
+  durationLabel: {
+    fontSize: '0.875rem',
+    color: 'rgba(255,255,255,0.4)',
+  },
+
+  // Guidance text - THE PRIMARY ELEMENT
+  // Large, centered, clearly readable, always visible during session
   guidance: {
-    maxWidth: '480px',
-    fontSize: '1.5rem',
+    maxWidth: '500px',
+    fontSize: '1.75rem',
     fontWeight: 400,
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(255,255,255,0.92)',
     textAlign: 'center',
     lineHeight: 1.5,
     letterSpacing: '0.01em',
+    margin: 0,
   },
 
-  // Timer - subtle, secondary
+  // Timer - secondary, smaller, positioned at bottom
   timer: {
     position: 'absolute',
     bottom: '2.5rem',
-    fontSize: '0.9375rem',
+    fontSize: '0.875rem',
     fontWeight: 400,
-    color: 'rgba(255,255,255,0.3)',
+    color: 'rgba(255,255,255,0.25)',
     fontVariantNumeric: 'tabular-nums',
     letterSpacing: '0.1em',
   },
