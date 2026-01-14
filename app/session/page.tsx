@@ -3,15 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Fixed 6-minute session duration
-const SESSION_DURATION = 6 * 60; // 360 seconds
-
-// Path to the guided meditation audio file (served from /public/audio/)
+const SESSION_DURATION = 6 * 60;
 const AUDIO_PATH = '/audio/daily-focus-reset.mp3';
 
-/**
- * Guidance array - visual backup for the audio experience.
- */
 const GUIDANCE = [
   { start: 0,   text: "Sit still. Let the body settle." },
   { start: 50,  text: "Notice the body as sensations." },
@@ -28,91 +22,47 @@ export default function SessionPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(SESSION_DURATION);
   const [guidanceText, setGuidanceText] = useState(GUIDANCE[0].text);
-
-  // Intro screen - shows only on first visit
   const [showIntro, setShowIntro] = useState(false);
 
-  // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.65);
+  const [volume, setVolume] = useState(0.6);
   const [audioError, setAudioError] = useState<string | null>(null);
 
   const startTimeRef = useRef<number | null>(null);
   const endTimeRef = useRef<number | null>(null);
-
-  // Audio element ref
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  /**
-   * Clear audio error state
-   */
-  const clearAudioError = useCallback(() => {
-    setAudioError(null);
-  }, []);
+  const clearAudioError = useCallback(() => setAudioError(null), []);
 
-  /**
-   * Initialize audio element and attach event listeners
-   */
   const initAudio = useCallback(() => {
     if (audioRef.current) return audioRef.current;
-
     const audio = new Audio(AUDIO_PATH);
     audio.loop = true;
     audio.volume = volume;
     audioRef.current = audio;
-
-    // Listen for errors
-    audio.onerror = () => {
-      const code = audio.error?.code;
-      const message = audio.error?.message || 'Unknown error';
-      setAudioError(`Audio error (code ${code}): ${message}`);
-    };
-
-    // Clear error when audio is ready
-    audio.oncanplay = () => {
-      clearAudioError();
-    };
-
-    // Sync playing state
+    audio.onerror = () => setAudioError('Audio unavailable');
+    audio.oncanplay = clearAudioError;
     audio.onplay = () => setIsPlaying(true);
     audio.onpause = () => setIsPlaying(false);
-
     return audio;
   }, [volume, clearAudioError]);
 
-  /**
-   * Sync volume changes to audio element
-   */
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
+    if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
 
-  /**
-   * Selects the active guidance based on elapsed time.
-   */
-  const getGuidanceForTime = useCallback((elapsedSeconds: number): string => {
-    let activeText = GUIDANCE[0].text;
+  const getGuidanceForTime = useCallback((elapsed: number): string => {
+    let text = GUIDANCE[0].text;
     for (const entry of GUIDANCE) {
-      if (elapsedSeconds >= entry.start) {
-        activeText = entry.text;
-      } else {
-        break;
-      }
+      if (elapsed >= entry.start) text = entry.text;
+      else break;
     }
-    return activeText;
+    return text;
   }, []);
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const formatTime = (s: number) =>
+    `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
-  /**
-   * Stop audio playback and reset position.
-   */
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -121,11 +71,6 @@ export default function SessionPage() {
     }
   }, []);
 
-  /**
-   * Start the session.
-   * Audio.play() is called directly inside this click handler (user gesture)
-   * to satisfy browser autoplay policies.
-   */
   const handleBegin = useCallback(async () => {
     const now = Date.now();
     startTimeRef.current = now;
@@ -135,29 +80,18 @@ export default function SessionPage() {
     setIsRunning(true);
     clearAudioError();
 
-    // Create or get audio element
     const audio = initAudio();
-    audio.volume = 0.65;
+    audio.volume = 0.6;
     audio.currentTime = 0;
-
-    // Play audio - must be in direct response to user gesture
     try {
-      const p = audio.play();
-      if (p !== undefined) {
-        await p;
-      }
+      await audio.play();
     } catch (err: unknown) {
-      const error = err as Error;
-      setAudioError(`${error.name}: ${error.message}`);
+      setAudioError((err as Error).message);
     }
   }, [initAudio, clearAudioError]);
 
-  /**
-   * Toggle play/pause for the audio.
-   */
   const togglePlayPause = useCallback(async () => {
     if (!audioRef.current) return;
-
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -165,54 +99,41 @@ export default function SessionPage() {
         await audioRef.current.play();
         clearAudioError();
       } catch (err: unknown) {
-        const error = err as Error;
-        setAudioError(`${error.name}: ${error.message}`);
+        setAudioError((err as Error).message);
       }
     }
   }, [isPlaying, clearAudioError]);
 
-  // Main loop: updates timer and guidance text every 100ms
   useEffect(() => {
     if (!isRunning || !startTimeRef.current || !endTimeRef.current) return;
-
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsed = Math.floor((now - startTimeRef.current!) / 1000);
       const remaining = Math.max(0, Math.ceil((endTimeRef.current! - now) / 1000));
-
       setTimeRemaining(remaining);
       setGuidanceText(getGuidanceForTime(elapsed));
-
       if (remaining <= 0) {
         clearInterval(interval);
         stopAudio();
         router.push('/reflection');
       }
     }, 100);
-
     return () => clearInterval(interval);
   }, [isRunning, router, getGuidanceForTime, stopAudio]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
-        audioRef.current = null;
       }
     };
   }, []);
 
-  // Check if user has seen intro on first visit
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
-    if (!hasSeenIntro) {
-      setShowIntro(true);
-    }
+    if (!localStorage.getItem('hasSeenIntro')) setShowIntro(true);
   }, []);
 
-  // Dismiss intro and remember in localStorage
   const dismissIntro = useCallback(() => {
     localStorage.setItem('hasSeenIntro', 'true');
     setShowIntro(false);
@@ -220,76 +141,68 @@ export default function SessionPage() {
 
   return (
     <main style={styles.container}>
-      {/* Background gradient for depth */}
-      <div style={styles.gradient} />
+      {/* Atmospheric background - warm organic gradient */}
+      <div style={styles.backgroundGradient} />
+      <div style={styles.backgroundOverlay} />
 
-      {/* Intro overlay - shows only on first visit */}
+      {/* First-time intro modal */}
       {showIntro && (
-        <div style={styles.introOverlay}>
-          <div style={styles.introContent}>
-            <h2 style={styles.introTitle}>Daily Focus Reset</h2>
-            <p style={styles.introText}>
-              This is a short guided exercise to reduce mental noise and create
-              distance from thoughts and sensations.
+        <div style={styles.introBackdrop}>
+          <div style={styles.introModal}>
+            <h2 style={styles.introTitle}>Focus Reset</h2>
+            <p style={styles.introBody}>
+              A short guided exercise to reduce mental noise and create distance
+              from thoughts and sensations.
             </p>
-            <p style={styles.introSubtext}>
-              There&apos;s nothing to achieve.<br />
+            <p style={styles.introNote}>
+              There is nothing to achieve.<br />
               Just listen and follow along.
             </p>
             <button style={styles.introButton} onClick={dismissIntro}>
-              Continue
+              Begin
             </button>
           </div>
         </div>
       )}
 
-      {/* Content */}
-      <div style={styles.content}>
-        {/* Title - small, top of screen */}
-        <span style={styles.title}>Daily Focus Reset</span>
+      {/* Floating app surface */}
+      <div style={styles.appCard}>
+        {/* Session label */}
+        <span style={styles.sessionLabel}>Daily Focus Reset</span>
 
-        {/* Pre-session state */}
-        {!isRunning && (
-          <div style={styles.startArea}>
+        {!isRunning ? (
+          /* Pre-session */
+          <div style={styles.preSession}>
             <button style={styles.beginButton} onClick={handleBegin}>
               Begin
             </button>
-            <span style={styles.durationLabel}>6 minutes</span>
-
-            {/* Show audio error if present */}
-            {audioError && (
-              <span style={styles.audioWarning}>{audioError}</span>
-            )}
+            <span style={styles.duration}>6 minutes</span>
+            {audioError && <span style={styles.error}>{audioError}</span>}
           </div>
-        )}
-
-        {/* During session */}
-        {isRunning && (
-          <>
-            {/* Guidance text - visual backup for voice */}
+        ) : (
+          /* Active session */
+          <div style={styles.activeSession}>
+            {/* Primary: guidance text */}
             <p style={styles.guidance}>{guidanceText}</p>
 
-            {/* Audio controls - minimal, centered below guidance */}
-            <div style={styles.audioControls}>
-              {/* Play/Pause button */}
+            {/* Secondary: audio controls */}
+            <div style={styles.controls}>
               <button
-                style={styles.playPauseButton}
+                style={styles.playButton}
                 onClick={togglePlayPause}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="6" y="4" width="4" height="16" rx="1" />
                     <rect x="14" y="4" width="4" height="16" rx="1" />
                   </svg>
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" />
                   </svg>
                 )}
               </button>
-
-              {/* Volume slider */}
               <input
                 type="range"
                 min="0"
@@ -302,192 +215,244 @@ export default function SessionPage() {
               />
             </div>
 
-            {/* Audio error during session */}
-            {audioError && (
-              <span style={styles.audioWarningActive}>{audioError}</span>
-            )}
+            {audioError && <span style={styles.errorActive}>{audioError}</span>}
 
-            {/* Timer - secondary, positioned at bottom */}
+            {/* Tertiary: timer */}
             <span style={styles.timer}>{formatTime(timeRemaining)}</span>
-          </>
+          </div>
         )}
       </div>
     </main>
   );
 }
 
+// Warm, earthy palette
+const colors = {
+  bg: '#1a1714',
+  warm: '#2d2622',
+  sand: '#c4b5a4',
+  cream: '#f5f0e8',
+  muted: 'rgba(196,181,164,0.5)',
+};
+
 const styles: Record<string, React.CSSProperties> = {
   container: {
     position: 'relative',
     minHeight: '100vh',
-    backgroundColor: '#0a0a0c',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
     overflow: 'hidden',
   },
 
-  gradient: {
+  // Warm organic gradient background
+  backgroundGradient: {
     position: 'absolute',
     inset: 0,
-    background: 'radial-gradient(ellipse at center, rgba(30,32,40,0.7) 0%, rgba(10,10,12,1) 70%)',
-    pointerEvents: 'none',
+    background: `
+      radial-gradient(ellipse 120% 80% at 20% 100%, rgba(139,109,76,0.25) 0%, transparent 50%),
+      radial-gradient(ellipse 100% 60% at 80% 0%, rgba(87,75,60,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 50% 50%, rgba(45,38,34,0.8) 0%, transparent 70%),
+      linear-gradient(180deg, #1a1714 0%, #0f0d0b 100%)
+    `,
   },
 
-  content: {
-    position: 'relative',
-    zIndex: 1,
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '2rem',
-  },
-
-  title: {
+  backgroundOverlay: {
     position: 'absolute',
-    top: '2.5rem',
-    fontSize: '0.75rem',
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.35)',
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
+    inset: 0,
+    background: 'radial-gradient(ellipse at center, transparent 0%, rgba(15,13,11,0.4) 100%)',
   },
 
-  startArea: {
+  // Floating app card
+  appCard: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '420px',
+    minHeight: '400px',
+    padding: '2.5rem 2rem',
+    backgroundColor: 'rgba(26,23,20,0.75)',
+    backdropFilter: 'blur(40px)',
+    WebkitBackdropFilter: 'blur(40px)',
+    borderRadius: '28px',
+    border: '1px solid rgba(196,181,164,0.08)',
+    boxShadow: `
+      0 4px 24px rgba(0,0,0,0.3),
+      0 1px 2px rgba(0,0,0,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.03)
+    `,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '1.25rem',
+  },
+
+  sessionLabel: {
+    fontSize: '0.6875rem',
+    fontWeight: 500,
+    color: colors.muted,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    marginBottom: '2rem',
+  },
+
+  // Pre-session state
+  preSession: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '1rem',
   },
 
   beginButton: {
-    padding: '1rem 3rem',
-    fontSize: '1.0625rem',
+    padding: '1rem 2.5rem',
+    fontSize: '1rem',
     fontWeight: 500,
-    color: '#0a0a0c',
-    backgroundColor: '#fff',
+    color: colors.bg,
+    backgroundColor: colors.cream,
     border: 'none',
     borderRadius: '100px',
     cursor: 'pointer',
     letterSpacing: '0.02em',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
 
-  durationLabel: {
-    fontSize: '0.875rem',
-    color: 'rgba(255,255,255,0.4)',
+  duration: {
+    fontSize: '0.8125rem',
+    color: colors.muted,
   },
 
-  audioWarning: {
+  error: {
     fontSize: '0.75rem',
-    color: 'rgba(255,200,150,0.8)',
-    maxWidth: '300px',
-    textAlign: 'center',
+    color: 'rgba(210,180,140,0.7)',
     marginTop: '0.5rem',
   },
 
-  guidance: {
-    maxWidth: '500px',
-    fontSize: '1.5rem',
-    fontWeight: 400,
-    color: 'rgba(255,255,255,0.82)',
-    textAlign: 'center',
-    lineHeight: 1.7,
-    letterSpacing: '0.01em',
-    margin: 0,
-    marginBottom: '2.5rem',
+  // Active session
+  activeSession: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
 
-  audioControls: {
+  // Primary element: guidance text
+  guidance: {
+    maxWidth: '340px',
+    fontSize: '1.375rem',
+    fontWeight: 400,
+    color: colors.cream,
+    textAlign: 'center',
+    lineHeight: 1.75,
+    letterSpacing: '0.01em',
+    marginBottom: '2.5rem',
+    opacity: 0.92,
+  },
+
+  // Audio controls
+  controls: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
+    gap: '0.875rem',
+    marginBottom: '1.5rem',
   },
 
-  playPauseButton: {
-    width: '44px',
-    height: '44px',
+  playButton: {
+    width: '48px',
+    height: '48px',
     borderRadius: '50%',
-    border: '1px solid rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    color: 'rgba(255,255,255,0.7)',
+    border: '1px solid rgba(196,181,164,0.15)',
+    backgroundColor: 'rgba(196,181,164,0.08)',
+    color: colors.sand,
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transition: 'background-color 0.15s ease',
   },
 
   volumeSlider: {
-    width: '80px',
+    width: '72px',
     height: '4px',
     cursor: 'pointer',
-    accentColor: 'rgba(255,255,255,0.5)',
+    accentColor: colors.sand,
+    opacity: 0.6,
   },
 
-  audioWarningActive: {
+  errorActive: {
     fontSize: '0.75rem',
-    color: 'rgba(255,200,150,0.8)',
-    marginTop: '1rem',
-    maxWidth: '300px',
-    textAlign: 'center',
+    color: 'rgba(210,180,140,0.7)',
+    marginBottom: '1rem',
   },
 
+  // Tertiary: timer
   timer: {
-    position: 'absolute',
-    bottom: '2.5rem',
-    fontSize: '0.875rem',
+    fontSize: '0.8125rem',
     fontWeight: 400,
-    color: 'rgba(255,255,255,0.25)',
+    color: 'rgba(196,181,164,0.35)',
     fontVariantNumeric: 'tabular-nums',
-    letterSpacing: '0.1em',
+    letterSpacing: '0.08em',
   },
 
-  // Intro overlay styles
-  introOverlay: {
+  // Intro modal
+  introBackdrop: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(10,10,12,0.95)',
+    backgroundColor: 'rgba(15,13,11,0.85)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2rem',
-    zIndex: 10,
+    padding: '1.5rem',
+    zIndex: 20,
   },
 
-  introContent: {
-    maxWidth: '400px',
+  introModal: {
+    maxWidth: '360px',
+    padding: '2.5rem 2rem',
+    backgroundColor: 'rgba(26,23,20,0.9)',
+    borderRadius: '24px',
+    border: '1px solid rgba(196,181,164,0.1)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
     textAlign: 'center',
   },
 
   introTitle: {
-    fontSize: '1.25rem',
+    fontSize: '1.125rem',
     fontWeight: 500,
-    color: 'rgba(255,255,255,0.9)',
+    color: colors.cream,
     marginBottom: '1.25rem',
-    letterSpacing: '0.01em',
+    letterSpacing: '0.02em',
   },
 
-  introText: {
-    fontSize: '1rem',
-    color: 'rgba(255,255,255,0.75)',
-    lineHeight: 1.7,
-    marginBottom: '1.5rem',
-  },
-
-  introSubtext: {
+  introBody: {
     fontSize: '0.9375rem',
-    color: 'rgba(255,255,255,0.5)',
+    color: 'rgba(196,181,164,0.8)',
+    lineHeight: 1.7,
+    marginBottom: '1rem',
+  },
+
+  introNote: {
+    fontSize: '0.875rem',
+    color: 'rgba(196,181,164,0.55)',
     lineHeight: 1.7,
     marginBottom: '2rem',
   },
 
   introButton: {
     padding: '0.875rem 2rem',
-    fontSize: '1rem',
+    fontSize: '0.9375rem',
     fontWeight: 500,
-    color: '#0a0a0c',
-    backgroundColor: '#fff',
+    color: colors.bg,
+    backgroundColor: colors.cream,
     border: 'none',
     borderRadius: '100px',
     cursor: 'pointer',
     letterSpacing: '0.02em',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
 };
