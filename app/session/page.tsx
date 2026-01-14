@@ -141,15 +141,16 @@ export default function SessionPage() {
 
   return (
     <main style={styles.container}>
-      {/* Atmospheric background - warm organic gradient */}
-      <div style={styles.backgroundGradient} />
-      <div style={styles.backgroundOverlay} />
+      {/* Organic field-like background - layered earth tones */}
+      <div style={styles.fieldLayer1} />
+      <div style={styles.fieldLayer2} />
+      <div style={styles.fieldLayer3} />
 
-      {/* First-time intro modal */}
+      {/* Intro overlay */}
       {showIntro && (
         <div style={styles.introBackdrop}>
-          <div style={styles.introModal}>
-            <h2 style={styles.introTitle}>Focus Reset</h2>
+          <div style={styles.introCard}>
+            <span style={styles.introLabel}>Focus Reset</span>
             <p style={styles.introBody}>
               A short guided exercise to reduce mental noise and create distance
               from thoughts and sensations.
@@ -165,13 +166,11 @@ export default function SessionPage() {
         </div>
       )}
 
-      {/* Floating app surface */}
-      <div style={styles.appCard}>
-        {/* Session label */}
+      {/* Soft organic app surface */}
+      <div style={styles.surface}>
         <span style={styles.sessionLabel}>Daily Focus Reset</span>
 
         {!isRunning ? (
-          /* Pre-session */
           <div style={styles.preSession}>
             <button style={styles.beginButton} onClick={handleBegin}>
               Begin
@@ -180,12 +179,9 @@ export default function SessionPage() {
             {audioError && <span style={styles.error}>{audioError}</span>}
           </div>
         ) : (
-          /* Active session */
           <div style={styles.activeSession}>
-            {/* Primary: guidance text */}
             <p style={styles.guidance}>{guidanceText}</p>
 
-            {/* Secondary: audio controls */}
             <div style={styles.controls}>
               <button
                 style={styles.playButton}
@@ -193,12 +189,12 @@ export default function SessionPage() {
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="4" width="4" height="16" rx="1" />
-                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                    <rect x="14" y="5" width="4" height="14" rx="1" />
                   </svg>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" />
                   </svg>
                 )}
@@ -217,7 +213,6 @@ export default function SessionPage() {
 
             {audioError && <span style={styles.errorActive}>{audioError}</span>}
 
-            {/* Tertiary: timer */}
             <span style={styles.timer}>{formatTime(timeRemaining)}</span>
           </div>
         )}
@@ -226,13 +221,21 @@ export default function SessionPage() {
   );
 }
 
-// Warm, earthy palette
-const colors = {
-  bg: '#1a1714',
-  warm: '#2d2622',
-  sand: '#c4b5a4',
-  cream: '#f5f0e8',
-  muted: 'rgba(196,181,164,0.5)',
+/*
+ * Organic field palette:
+ * - Deep olive/moss for depth
+ * - Warm sand/wheat for highlights
+ * - Muted ember for warmth
+ * - Soft sage for life
+ */
+const palette = {
+  deep: '#1c1f1a',
+  moss: '#2a2f26',
+  olive: '#3d4438',
+  sage: '#5a6352',
+  sand: '#c8bea7',
+  wheat: '#e8e0d0',
+  ember: '#8b7355',
 };
 
 const styles: Record<string, React.CSSProperties> = {
@@ -244,42 +247,49 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: '1.5rem',
     overflow: 'hidden',
+    backgroundColor: palette.deep,
   },
 
-  // Warm organic gradient background
-  backgroundGradient: {
+  // Layered organic field background
+  fieldLayer1: {
     position: 'absolute',
     inset: 0,
     background: `
-      radial-gradient(ellipse 120% 80% at 20% 100%, rgba(139,109,76,0.25) 0%, transparent 50%),
-      radial-gradient(ellipse 100% 60% at 80% 0%, rgba(87,75,60,0.3) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 80% at 50% 50%, rgba(45,38,34,0.8) 0%, transparent 70%),
-      linear-gradient(180deg, #1a1714 0%, #0f0d0b 100%)
+      radial-gradient(ellipse 140% 70% at 30% 100%, ${palette.olive}88 0%, transparent 60%),
+      radial-gradient(ellipse 120% 50% at 70% 90%, ${palette.ember}44 0%, transparent 50%),
+      linear-gradient(175deg, ${palette.deep} 0%, ${palette.moss} 100%)
     `,
   },
 
-  backgroundOverlay: {
+  fieldLayer2: {
     position: 'absolute',
     inset: 0,
-    background: 'radial-gradient(ellipse at center, transparent 0%, rgba(15,13,11,0.4) 100%)',
+    background: `
+      radial-gradient(ellipse 80% 40% at 80% 20%, ${palette.sage}33 0%, transparent 50%),
+      radial-gradient(ellipse 100% 60% at 10% 60%, ${palette.olive}55 0%, transparent 50%)
+    `,
   },
 
-  // Floating app card
-  appCard: {
+  fieldLayer3: {
+    position: 'absolute',
+    inset: 0,
+    background: `
+      radial-gradient(ellipse 60% 60% at 50% 50%, transparent 30%, ${palette.deep}66 100%)
+    `,
+  },
+
+  // Soft organic surface
+  surface: {
     position: 'relative',
     width: '100%',
-    maxWidth: '420px',
-    minHeight: '400px',
+    maxWidth: '400px',
+    minHeight: '380px',
     padding: '2.5rem 2rem',
-    backgroundColor: 'rgba(26,23,20,0.75)',
-    backdropFilter: 'blur(40px)',
-    WebkitBackdropFilter: 'blur(40px)',
-    borderRadius: '28px',
-    border: '1px solid rgba(196,181,164,0.08)',
+    backgroundColor: `${palette.moss}cc`,
+    borderRadius: '32px',
     boxShadow: `
-      0 4px 24px rgba(0,0,0,0.3),
-      0 1px 2px rgba(0,0,0,0.2),
-      inset 0 1px 0 rgba(255,255,255,0.03)
+      0 8px 40px ${palette.deep}88,
+      0 2px 8px ${palette.deep}44
     `,
     display: 'flex',
     flexDirection: 'column',
@@ -287,49 +297,49 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   sessionLabel: {
-    fontSize: '0.6875rem',
+    fontSize: '0.625rem',
     fontWeight: 500,
-    color: colors.muted,
-    letterSpacing: '0.12em',
+    color: `${palette.sage}`,
+    letterSpacing: '0.14em',
     textTransform: 'uppercase',
-    marginBottom: '2rem',
+    marginBottom: '2.5rem',
+    opacity: 0.7,
   },
 
-  // Pre-session state
   preSession: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '1rem',
+    gap: '1.25rem',
   },
 
   beginButton: {
-    padding: '1rem 2.5rem',
-    fontSize: '1rem',
+    padding: '1rem 2.25rem',
+    fontSize: '0.9375rem',
     fontWeight: 500,
-    color: colors.bg,
-    backgroundColor: colors.cream,
+    color: palette.deep,
+    backgroundColor: palette.sand,
     border: 'none',
     borderRadius: '100px',
     cursor: 'pointer',
-    letterSpacing: '0.02em',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    letterSpacing: '0.03em',
   },
 
   duration: {
-    fontSize: '0.8125rem',
-    color: colors.muted,
+    fontSize: '0.75rem',
+    color: palette.sage,
+    opacity: 0.6,
   },
 
   error: {
-    fontSize: '0.75rem',
-    color: 'rgba(210,180,140,0.7)',
+    fontSize: '0.6875rem',
+    color: palette.ember,
+    opacity: 0.7,
     marginTop: '0.5rem',
   },
 
-  // Active session
   activeSession: {
     flex: 1,
     display: 'flex',
@@ -337,73 +347,74 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    paddingBottom: '1rem',
   },
 
-  // Primary element: guidance text
+  // Calm, not dominant guidance text
   guidance: {
-    maxWidth: '340px',
-    fontSize: '1.375rem',
+    maxWidth: '320px',
+    fontSize: '1.25rem',
     fontWeight: 400,
-    color: colors.cream,
+    color: palette.wheat,
     textAlign: 'center',
-    lineHeight: 1.75,
+    lineHeight: 1.8,
     letterSpacing: '0.01em',
-    marginBottom: '2.5rem',
-    opacity: 0.92,
+    marginBottom: '3rem',
+    opacity: 0.88,
   },
 
-  // Audio controls
+  // Tactile, organic controls
   controls: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.875rem',
-    marginBottom: '1.5rem',
+    gap: '1rem',
+    marginBottom: '2rem',
   },
 
   playButton: {
-    width: '48px',
-    height: '48px',
+    width: '44px',
+    height: '44px',
     borderRadius: '50%',
-    border: '1px solid rgba(196,181,164,0.15)',
-    backgroundColor: 'rgba(196,181,164,0.08)',
-    color: colors.sand,
+    border: 'none',
+    backgroundColor: `${palette.olive}`,
+    color: palette.sand,
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'background-color 0.15s ease',
+    opacity: 0.8,
   },
 
   volumeSlider: {
-    width: '72px',
-    height: '4px',
+    width: '64px',
+    height: '3px',
     cursor: 'pointer',
-    accentColor: colors.sand,
-    opacity: 0.6,
+    accentColor: palette.sage,
+    opacity: 0.5,
   },
 
   errorActive: {
-    fontSize: '0.75rem',
-    color: 'rgba(210,180,140,0.7)',
+    fontSize: '0.6875rem',
+    color: palette.ember,
+    opacity: 0.7,
     marginBottom: '1rem',
   },
 
-  // Tertiary: timer
+  // Extremely subtle timer
   timer: {
-    fontSize: '0.8125rem',
+    fontSize: '0.75rem',
     fontWeight: 400,
-    color: 'rgba(196,181,164,0.35)',
+    color: palette.sage,
     fontVariantNumeric: 'tabular-nums',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.1em',
+    opacity: 0.35,
   },
 
-  // Intro modal
+  // Soft intro overlay
   introBackdrop: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(15,13,11,0.85)',
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
+    backgroundColor: `${palette.deep}e6`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -411,48 +422,50 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 20,
   },
 
-  introModal: {
-    maxWidth: '360px',
+  introCard: {
+    maxWidth: '340px',
     padding: '2.5rem 2rem',
-    backgroundColor: 'rgba(26,23,20,0.9)',
-    borderRadius: '24px',
-    border: '1px solid rgba(196,181,164,0.1)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+    backgroundColor: palette.moss,
+    borderRadius: '28px',
     textAlign: 'center',
   },
 
-  introTitle: {
-    fontSize: '1.125rem',
+  introLabel: {
+    display: 'block',
+    fontSize: '0.625rem',
     fontWeight: 500,
-    color: colors.cream,
-    marginBottom: '1.25rem',
-    letterSpacing: '0.02em',
+    color: palette.sage,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    marginBottom: '1.5rem',
+    opacity: 0.7,
   },
 
   introBody: {
     fontSize: '0.9375rem',
-    color: 'rgba(196,181,164,0.8)',
-    lineHeight: 1.7,
+    color: palette.wheat,
+    lineHeight: 1.75,
     marginBottom: '1rem',
+    opacity: 0.85,
   },
 
   introNote: {
-    fontSize: '0.875rem',
-    color: 'rgba(196,181,164,0.55)',
+    fontSize: '0.8125rem',
+    color: palette.sand,
     lineHeight: 1.7,
     marginBottom: '2rem',
+    opacity: 0.55,
   },
 
   introButton: {
     padding: '0.875rem 2rem',
-    fontSize: '0.9375rem',
+    fontSize: '0.875rem',
     fontWeight: 500,
-    color: colors.bg,
-    backgroundColor: colors.cream,
+    color: palette.deep,
+    backgroundColor: palette.sand,
     border: 'none',
     borderRadius: '100px',
     cursor: 'pointer',
-    letterSpacing: '0.02em',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    letterSpacing: '0.03em',
   },
 };
