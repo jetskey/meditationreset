@@ -29,6 +29,9 @@ export default function SessionPage() {
   const [timeRemaining, setTimeRemaining] = useState(SESSION_DURATION);
   const [guidanceText, setGuidanceText] = useState(GUIDANCE[0].text);
 
+  // Intro screen - shows only on first visit
+  const [showIntro, setShowIntro] = useState(false);
+
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.65);
@@ -201,10 +204,44 @@ export default function SessionPage() {
     };
   }, []);
 
+  // Check if user has seen intro on first visit
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  // Dismiss intro and remember in localStorage
+  const dismissIntro = useCallback(() => {
+    localStorage.setItem('hasSeenIntro', 'true');
+    setShowIntro(false);
+  }, []);
+
   return (
     <main style={styles.container}>
       {/* Background gradient for depth */}
       <div style={styles.gradient} />
+
+      {/* Intro overlay - shows only on first visit */}
+      {showIntro && (
+        <div style={styles.introOverlay}>
+          <div style={styles.introContent}>
+            <h2 style={styles.introTitle}>Daily Focus Reset</h2>
+            <p style={styles.introText}>
+              This is a short guided exercise to reduce mental noise and create
+              distance from thoughts and sensations.
+            </p>
+            <p style={styles.introSubtext}>
+              There&apos;s nothing to achieve.<br />
+              Just listen and follow along.
+            </p>
+            <button style={styles.introButton} onClick={dismissIntro}>
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div style={styles.content}>
@@ -218,16 +255,6 @@ export default function SessionPage() {
               Begin
             </button>
             <span style={styles.durationLabel}>6 minutes</span>
-
-            {/* Test audio link for debugging */}
-            <a
-              href={AUDIO_PATH}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.testAudioLink}
-            >
-              Test audio file
-            </a>
 
             {/* Show audio error if present */}
             {audioError && (
@@ -349,13 +376,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(255,255,255,0.4)',
   },
 
-  testAudioLink: {
-    fontSize: '0.75rem',
-    color: 'rgba(255,255,255,0.3)',
-    textDecoration: 'underline',
-    marginTop: '0.5rem',
-  },
-
   audioWarning: {
     fontSize: '0.75rem',
     color: 'rgba(255,200,150,0.8)',
@@ -418,5 +438,56 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(255,255,255,0.25)',
     fontVariantNumeric: 'tabular-nums',
     letterSpacing: '0.1em',
+  },
+
+  // Intro overlay styles
+  introOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(10,10,12,0.95)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem',
+    zIndex: 10,
+  },
+
+  introContent: {
+    maxWidth: '400px',
+    textAlign: 'center',
+  },
+
+  introTitle: {
+    fontSize: '1.25rem',
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: '1.25rem',
+    letterSpacing: '0.01em',
+  },
+
+  introText: {
+    fontSize: '1rem',
+    color: 'rgba(255,255,255,0.75)',
+    lineHeight: 1.7,
+    marginBottom: '1.5rem',
+  },
+
+  introSubtext: {
+    fontSize: '0.9375rem',
+    color: 'rgba(255,255,255,0.5)',
+    lineHeight: 1.7,
+    marginBottom: '2rem',
+  },
+
+  introButton: {
+    padding: '0.875rem 2rem',
+    fontSize: '1rem',
+    fontWeight: 500,
+    color: '#0a0a0c',
+    backgroundColor: '#fff',
+    border: 'none',
+    borderRadius: '100px',
+    cursor: 'pointer',
+    letterSpacing: '0.02em',
   },
 };
