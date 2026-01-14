@@ -31,7 +31,7 @@ export default function SessionPage() {
 
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(0.65);
   const [audioError, setAudioError] = useState<string | null>(null);
 
   const startTimeRef = useRef<number | null>(null);
@@ -134,7 +134,7 @@ export default function SessionPage() {
 
     // Create or get audio element
     const audio = initAudio();
-    audio.volume = 0.8;
+    audio.volume = 0.65;
     audio.currentTime = 0;
 
     // Play audio - must be in direct response to user gesture
@@ -368,12 +368,12 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '500px',
     fontSize: '1.5rem',
     fontWeight: 400,
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.82)',
     textAlign: 'center',
-    lineHeight: 1.5,
+    lineHeight: 1.7,
     letterSpacing: '0.01em',
     margin: 0,
-    marginBottom: '2rem',
+    marginBottom: '2.5rem',
   },
 
   audioControls: {
