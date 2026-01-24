@@ -1,7 +1,7 @@
 /**
  * ROOT LAYOUT
  * - Arimo font only
- * - Light theme (#E6E3DE)
+ * - Dark planetary theme
  */
 
 import type { Metadata, Viewport } from 'next';
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: 'A minimalist app for mental clarity',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Idle',
   },
 };
@@ -25,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#E6E3DE',
+  themeColor: '#0F0E0D',
   viewportFit: 'cover',
 };
 

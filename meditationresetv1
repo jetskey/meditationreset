@@ -1,260 +1,272 @@
-# IDLE — Visual System Reset (STRICT)
+# IDLE — Dark Planetary Visual System (STRICT)
 
-This document defines the EXACT visual rules for IDLE. No interpretation. No alternatives.
+This document defines the EXACT visual rules. No interpretation. No alternatives.
 
----
-
-## 1. FONT RULES
-
-**Font Family:** Arimo (Google Fonts)
-**No fallbacks. No alternatives.**
-
-| Usage | Weight |
-|-------|--------|
-| Headlines | Arimo SemiBold (600) |
-| Body text | Arimo Regular (400) |
-| Buttons | Arimo Medium (500) |
-| Labels | Arimo Medium (500) |
-
-**Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&display=swap');
-```
-
-**CSS:**
-```css
-font-family: 'Arimo', sans-serif;
-```
+Visual language: DARK, EARTHY, PLANETARY, CINEMATIC.
+Reference: Standing on Mars. Iron dust. Low light. Atmosphere. Depth.
 
 ---
 
-## 2. COLOR TOKENS
+## 1. COLOR TOKENS (EXACT)
 
-### Backgrounds
+### Background Gradient (MANDATORY)
+
+```css
+background: linear-gradient(to bottom, #0F0E0D, #2A211B);
+```
+
+| Position | Hex | Description |
+|----------|-----|-------------|
+| Top | `#0F0E0D` | Near-black brown |
+| Bottom | `#2A211B` | Dark earthy brown |
+
+**Rules:**
+- Vertical gradient ONLY
+- NO flat backgrounds
+- NO horizontal gradients
+
+### Primary Surface (Glass/Overlay)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--surface` | `rgba(26, 24, 22, 0.7)` | Glass overlays, cards |
+
+Opacity range: 60–75% only.
+
+### Text Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--bg-primary` | `#E6E3DE` | Primary background (warm stone off-white) |
-| `--bg-secondary` | `#DAD6D0` | Secondary background (foggy sand) |
-
-### Text
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--text-primary` | `#1F1F1F` | Primary text (soft charcoal) |
-| `--text-secondary` | `#5A5A5A` | Secondary text (muted grey) |
-
-### Dividers
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--divider` | `#C9C5BF` | Hairlines, borders, separators |
-
-### Accents
-
-**NONE.**
-
-If accent unavoidable: use `--text-primary` at reduced opacity.
+| `--text-primary` | `#E8E4DF` | Primary text (warm off-white) |
+| `--text-secondary` | `#A8A29B` | Secondary text (dusty stone) |
+| `--text-muted` | `#6F6A64` | Muted UI elements |
 
 ### Forbidden Colors
 
-- ANY green hue
+- `#FFFFFF` or any near-white
+- ANY sage tone
+- ANY green
 - ANY pastel
-- ANY saturated color
-- ANY blue
-- ANY "calming" color
-- ANY wellness palette color
+- ANY beige
+- ANY "calming" light tone
+- ANY color not listed above
 
 ---
 
-## 3. BACKGROUND IMAGE RULES
+## 2. BACKGROUND DEPTH (MANDATORY)
 
-Background images are OPTIONAL.
+The background must feel deep and atmospheric.
 
-### If Used, MUST Be:
+### Required Techniques (use ALL):
 
-- Desaturated to near-monochrome
-- Blurred
+**1. Base Gradient:**
+```css
+background: linear-gradient(to bottom, #0F0E0D, #2A211B);
+```
+
+**2. Radial Darkening (edges):**
+```css
+background: radial-gradient(
+  ellipse at center,
+  transparent 0%,
+  rgba(0, 0, 0, 0.4) 100%
+);
+```
+
+**3. Subtle Grain Texture:**
+```css
+background-image: url("data:image/svg+xml,...noise...");
+opacity: 0.04;
+```
+
+### Rules:
+- NO visible patterns
+- NO imagery
+- NO illustrations
+- Must feel like atmosphere, not a picture
+
+---
+
+## 3. CIRCULAR ELEMENT (MANDATORY REDESIGN)
+
+The session orb/circle MUST feel:
+- Heavy
+- Grounded
+- Physical
+- Like stone or metal in low light
+
+### Exact Treatment:
+
+**Base:**
+```css
+background: radial-gradient(
+  circle at center,
+  #1F1C1A 0%,
+  #141210 70%,
+  #0A0908 100%
+);
+box-shadow:
+  inset 0 2px 20px rgba(0, 0, 0, 0.8),
+  0 0 60px rgba(0, 0, 0, 0.5);
+```
+
+**Progress Indication:**
+- Extremely subtle
 - Low contrast
-- Abstract only
-
-### Allowed Subjects:
-
-- Grey fog over water
-- Snow texture
-- Blurred stone surface
-- Sand (desaturated)
-- Overcast sky (grey only)
+- Use `#3A3430` for progress arc
+- NO bright arc
+- NO glowing ring
 
 ### Forbidden:
-
-- Forests
-- Leaves
-- Grass
-- Plants
-- Mountains with detail
-- Sunsets
-- Any green imagery
-- Wellness stock photos
-- Nature landscapes
+- Light disc
+- Sage ring
+- Soft wellness halo
+- Clock-like appearance
+- Fitness ring appearance
+- Meditation halo
 
 ---
 
-## 4. LIQUID GLASS RULES
+## 4. LIQUID GLASS (DARK ONLY)
 
-Glass is FUNCTIONAL, not decorative.
+Glass is allowed ONLY if DARK.
 
 ### Treatment:
-
 ```css
 .glass {
-  background: rgba(230, 227, 222, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--divider);
+  background: rgba(26, 24, 22, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(111, 106, 100, 0.2);
   border-radius: 16px;
 }
 ```
 
 ### Rules:
-
-- Background blur: light (12px max)
-- Opacity: low (70% max)
-- No shine
-- No gloss
-- No reflections
-- No shadows unless structural
-- Rounded corners only if already present
-
-### When In Doubt:
-
-DO NOT USE GLASS.
+- Dark translucent surfaces ONLY
+- Very low blur (8px max)
+- NO glow
+- NO light edges
+- NO frosted white glass
+- If glass lightens UI → REMOVE IT
 
 ---
 
-## 5. LAYOUT RULES
+## 5. CONTRAST RULES (DARK UI)
 
-### Structure:
+### Text on Background:
+- Primary text (#E8E4DF) on gradient: HIGH contrast
+- Secondary text (#A8A29B) on gradient: MEDIUM contrast
+- Muted (#6F6A64) on gradient: LOW contrast (intentional)
 
-- One primary column
-- Centered vertically and horizontally
-- Large margins (minimum 24px, prefer 40px+)
-- No decorative containers
-- No cards unless structurally required
-
-### Hierarchy (exact order):
-
-1. Title
-2. One short supporting sentence
-3. One primary action
-
-Nothing else.
-
-### Spacing Scale:
-
-```
-8px   — tight
-16px  — base
-24px  — comfortable
-40px  — section
-64px  — major division
-```
+### Interactive States:
+- Hover: lighten by 5% max
+- Active: darken by 5%
+- NO white highlights
+- NO glow effects
 
 ---
 
-## 6. REMOVED UI ELEMENTS
-
-The following have been explicitly removed:
+## 6. REMOVED ELEMENTS (EXPLICIT)
 
 ### Colors Removed:
-- [x] `#1C1F1B` — green-tinted dark background
-- [x] `#262B25` — green-tinted surface
-- [x] `#1A1918` — dark charcoal background
-- [x] `#252322` — dark surface
-- [x] `rgba(20,24,20,...)` — green glass tints
-- [x] All dark mode colors
-- [x] All green hues
-- [x] All nature-coded colors
-
-### Imagery Removed:
-- [x] Grass background (`/backgrounds/grass.jpg`)
-- [x] `grassDrift` animation
-- [x] Dark atmospheric gradients
-- [x] Fog overlays (dark)
-- [x] Nature-themed backgrounds
+- [x] `#E6E3DE` — light background
+- [x] `#DAD6D0` — foggy sand
+- [x] `#1F1F1F` — text on light
+- [x] `#5A5A5A` — secondary on light
+- [x] `#C9C5BF` — light dividers
+- [x] ALL white backgrounds
+- [x] ALL sage tones
+- [x] ALL light glass
 
 ### UI Elements Removed:
-- [x] Dark theme entirely
-- [x] Green overlays
-- [x] Nature-themed decoration
-- [x] "Wellness" visual language
-- [x] Warm color-based visual depth
-- [x] Heavy glass effects
-- [x] Decorative shadows
-
-### Fonts Removed:
-- [x] Inter font family
-- [x] All fallback fonts
+- [x] Light theme entirely
+- [x] White/beige backgrounds
+- [x] Light disc/circle
+- [x] Wellness-style minimalism
+- [x] "Calm app" aesthetic
+- [x] Frosted white glass
+- [x] Light borders
 
 ---
 
 ## 7. IMPLEMENTATION NOTES
 
-### CSS Variables (exact):
-
+### CSS Variables:
 ```css
 :root {
-  --bg-primary: #E6E3DE;
-  --bg-secondary: #DAD6D0;
-  --text-primary: #1F1F1F;
-  --text-secondary: #5A5A5A;
-  --divider: #C9C5BF;
+  --bg-top: #0F0E0D;
+  --bg-bottom: #2A211B;
+  --surface: rgba(26, 24, 22, 0.7);
+  --text-primary: #E8E4DF;
+  --text-secondary: #A8A29B;
+  --text-muted: #6F6A64;
+  --border: rgba(111, 106, 100, 0.2);
 }
 ```
 
-### Body Styles:
-
+### Body:
 ```css
 body {
-  background-color: var(--bg-primary);
+  background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
   color: var(--text-primary);
   font-family: 'Arimo', sans-serif;
+  min-height: 100vh;
 }
 ```
 
-### Text Opacity (if accent needed):
-
+### Background Layer:
 ```css
-.muted { color: var(--text-primary); opacity: 0.5; }
-.hint { color: var(--text-primary); opacity: 0.35; }
+#app-background {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to bottom, #0F0E0D, #2A211B);
+}
+
+#app-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+}
+
+#app-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 ```
 
-### Glass (minimal):
-
+### Glass:
 ```css
 .glass {
-  background: rgba(230, 227, 222, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--divider);
+  background: rgba(26, 24, 22, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(111, 106, 100, 0.2);
   border-radius: 16px;
 }
 ```
-
-### No Background Image Default:
-
-Background images removed by default. App uses solid `--bg-primary`.
 
 ---
 
 ## CONSTRAINTS (ABSOLUTE)
 
-- Do NOT add features
-- Do NOT suggest alternatives
-- Do NOT interpret mood
-- Do NOT introduce new colors
-- Do NOT keep any green
-- Do NOT use dark mode
-- Do NOT use any font except Arimo
+- Do NOT lighten the UI
+- Do NOT add green
+- Do NOT add white
+- Do NOT add sage
+- Do NOT add pastel
+- Do NOT interpret metaphorically
+
+This UI must feel:
+- Grounded
+- Heavy
+- Quiet
+- Intentional
+
+Like a device operating in low light on another planet.
 
 ---
 
