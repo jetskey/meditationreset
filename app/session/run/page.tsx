@@ -11,7 +11,7 @@
  * See PRODUCT_GUARDRAILS.md for full documentation.
  */
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
 import SessionPlayer, { SessionPlayerHandle, SessionPhase } from '@/components/SessionPlayer';
 import { IdleOrb } from '@/components/IdleOrb';
@@ -30,17 +30,11 @@ import { useStats } from '@/lib/stats';
  * - Creates ritual entry without extra UI
  */
 
-const SESSION_CONFIG: Record<string, { src: string; title: string; subtitle: string }> = {
-  prime: {
-    src: '/audio/guided-session.m4a',
-    title: 'Prime',
-    subtitle: 'Morning Focus',
-  },
-  decompress: {
-    src: '/audio/guided-session.m4a',
-    title: 'Decompress',
-    subtitle: 'Evening Reset',
-  },
+// Single session config — no time-of-day distinction
+const SESSION_CONFIG = {
+  src: '/audio/guided-session.m4a',
+  title: 'Reset',
+  subtitle: '7 minutes',
 };
 
 function formatTime(seconds: number): string {
@@ -52,13 +46,12 @@ function formatTime(seconds: number): string {
 }
 
 function RunContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const playerRef = useRef<SessionPlayerHandle>(null);
   const { recordSession } = useStats();
 
-  const mode = searchParams.get('mode') || 'prime';
-  const config = SESSION_CONFIG[mode] || SESSION_CONFIG.prime;
+  // Single session — no mode selection
+  const config = SESSION_CONFIG;
 
   // Track session phase for threshold effects
   const [sessionPhase, setSessionPhase] = useState<SessionPhase>('ready');

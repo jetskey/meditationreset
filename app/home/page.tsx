@@ -40,10 +40,7 @@ const QUOTES = [
   "Begin again.",
 ];
 
-function getDefaultSession(): 'prime' | 'decompress' {
-  const hour = new Date().getHours();
-  return hour < 12 ? 'prime' : 'decompress';
-}
+// Single daily session — no time-of-day distinction
 
 // ═══════════════════════════════════════════════════════════════
 // READINESS STATE — Derived from stats
@@ -69,7 +66,6 @@ export default function HomePage() {
   const router = useRouter();
   const { stats } = useStats();
   const { isClientReady, showLanding, dismissLanding, revisitLanding } = useLanding();
-  const defaultSession = getDefaultSession();
 
   // ─────────────────────────────────────────────────────────────
   // PROGRESSIVE REVEAL — Landing page text stages
@@ -258,7 +254,7 @@ export default function HomePage() {
             ═══════════════════════════════════════════════════════════════ */}
         <footer className="px-6 pb-6">
           <button
-            onClick={() => router.push(`/session/run?mode=${defaultSession}`)}
+            onClick={() => router.push('/session/run')}
             className="glass w-full py-4 transition-all duration-200 active:scale-[0.97]"
           >
             <div className="flex items-center justify-center gap-3">
@@ -278,13 +274,6 @@ export default function HomePage() {
               )}
             </div>
           </button>
-
-          <p
-            className="mt-4 text-center text-[10px] uppercase tracking-[0.18em]"
-            style={{ color: 'var(--muted)', opacity: 0.3 }}
-          >
-            {defaultSession === 'prime' ? 'Morning reset' : 'Evening reset'}
-          </p>
         </footer>
       </div>
     </div>

@@ -82,7 +82,7 @@ export default function WelcomeOverlay() {
             fontSize: 16,
           }}
         >
-          a short daily reset. nothing to achieve.
+          one session. once a day. nothing to achieve.
         </p>
 
         <button

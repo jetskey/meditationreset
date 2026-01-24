@@ -1,0 +1,181 @@
+# IDLE v1 — Single Daily Session
+
+This document records the changes made to remove morning/evening session concepts and implement a single, time-neutral daily session.
+
+---
+
+## Summary
+
+IDLE now offers exactly ONE daily session with no time-of-day labeling. The session is neutral and works at any time of day. Users are never asked to choose a session type.
+
+---
+
+## Removed Logic
+
+### 1. Session Type Selection
+- **Deleted:** `components/SessionPicker.tsx`
+  - Previously offered "Prime" (Morning reset) and "Decompress" (Evening reset)
+  - Users had to choose between two session types
+  - Now removed entirely
+
+### 2. Time-Based Session Defaults
+- **Removed from `app/home/page.tsx`:**
+  ```javascript
+  // REMOVED:
+  function getDefaultSession(): 'prime' | 'decompress' {
+    const hour = new Date().getHours();
+    return hour < 12 ? 'prime' : 'decompress';
+  }
+  ```
+  - Previously auto-selected session type based on time of day
+  - Removed `defaultSession` variable
+  - Removed "Morning reset" / "Evening reset" footer label
+
+### 3. Session Mode URL Parameters
+- **Removed from `app/session/run/page.tsx`:**
+  - Previously: `/session/run?mode=prime` or `/session/run?mode=decompress`
+  - Now: `/session/run` (no parameters)
+  - Removed `useSearchParams` import
+  - Removed mode-based config lookup
+
+### 4. Dual Session Configuration
+- **Simplified in `app/session/run/page.tsx`:**
+  ```javascript
+  // BEFORE:
+  const SESSION_CONFIG: Record<string, {...}> = {
+    prime: { title: 'Prime', subtitle: 'Morning Focus', ... },
+    decompress: { title: 'Decompress', subtitle: 'Evening Reset', ... },
+  };
+
+  // AFTER:
+  const SESSION_CONFIG = {
+    src: '/audio/guided-session.m4a',
+    title: 'Reset',
+    subtitle: '7 minutes',
+  };
+  ```
+
+---
+
+## New Simplified Session Logic
+
+### Session Flow
+1. User opens app → sees home screen
+2. Taps "Begin" → navigates to `/session/run`
+3. Single 7-minute guided session plays
+4. On completion → session is logged, returns to home
+
+### Session Availability
+- One session unlocks per day
+- After completion, home shows "Reset complete" state
+- User can reset again if desired (button changes to "Reset again")
+- No pressure, no streak language
+
+### Readiness States
+```javascript
+type ReadinessState = 'idle' | 'completed';
+
+const STATE_COPY = {
+  idle: {
+    centerText: 'Ready when you are',
+    buttonLabel: 'Begin',
+    buttonDuration: '7 min',
+  },
+  completed: {
+    centerText: 'Reset complete',
+    buttonLabel: 'Reset again',
+    buttonDuration: null,
+  },
+};
+```
+
+---
+
+## Updated Onboarding Copy
+
+### Welcome Overlay (`components/WelcomeOverlay.tsx`)
+- **Before:** "a short daily reset. nothing to achieve."
+- **After:** "one session. once a day. nothing to achieve."
+
+### Landing Page (`app/home/page.tsx`)
+- Headline: "Seven minutes. Once a day."
+- Subhead: "A daily pause for the mind"
+- Reassurance 1: "There's nothing to learn and nothing to get right."
+- Reassurance 2: "You simply begin — and return."
+
+### Session Page (`app/session/page.tsx`)
+- Title: "Session"
+- Duration: "7 minutes"
+- Button: "Begin" with subtitle "Daily reset"
+- Hint: "Audio guided · One session per day"
+
+---
+
+## Updated Session Description Copy
+
+### During Session (`app/session/run/page.tsx`)
+- Title: "Reset"
+- Subtitle: "7 minutes"
+- No time-of-day labeling
+- Neutral, works any time
+
+### Home Screen
+- No "Morning reset" / "Evening reset" labels
+- Simple "Begin" or "Reset again" button
+- Duration shown as "7 min" only in idle state
+
+---
+
+## Copy & Tone Guidelines Applied
+
+### Preferred Language
+- begin, return, reset, pause, continue
+- clarity, stillness, space
+- Factual, calm, understated
+
+### Avoided Language
+- improve, optimize, boost, achieve, unlock
+- train, performance, productivity, focus (as verbs)
+- Exclamation marks, enthusiasm, celebration
+- "Great job!", "You did it!", "Keep going!"
+- Morning, evening, AM, PM, time-of-day references
+
+---
+
+## Files Modified
+
+1. `app/home/page.tsx` — Removed time-based session selection
+2. `app/session/page.tsx` — Replaced SessionPicker with single session button
+3. `app/session/run/page.tsx` — Simplified to single session config
+4. `components/WelcomeOverlay.tsx` — Updated onboarding copy
+5. `components/SessionPicker.tsx` — **DELETED**
+
+---
+
+## Assumptions Made
+
+1. **Audio file remains the same:** Both Prime and Decompress used the same audio file (`guided-session.m4a`), so no audio changes needed.
+
+2. **Stats logic unchanged:** The existing stats system (streaks, sessionsToday, totalFocusSeconds) works correctly with a single session model.
+
+3. **Multiple sessions per day allowed:** Users can complete multiple sessions per day if desired. The "completed" state shows "Reset again" rather than blocking.
+
+4. **No scheduling features:** No reminders, notifications, or preferred time selection — aligned with product guardrails.
+
+---
+
+## Testing Checklist
+
+- [ ] Home screen shows "Begin" with "7 min" for idle state
+- [ ] Home screen shows "Reset complete" after session
+- [ ] Session page shows single "Begin" button (no picker)
+- [ ] Session runs with neutral "Reset" / "7 minutes" labels
+- [ ] No morning/evening text appears anywhere in the app
+- [ ] Onboarding emphasizes "one session, once a day"
+- [ ] Navigation works: Home → Session → Stats via TabBar
+- [ ] Audio fades in/out correctly
+- [ ] Stats persist across refresh
+
+---
+
+*Last updated: January 2025*
