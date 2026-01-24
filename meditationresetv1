@@ -178,4 +178,311 @@ const STATE_COPY = {
 
 ---
 
+---
+
+# IDLE v1.1 — Visual Design System Reset
+
+This section documents the complete visual redesign to move away from "grass green / wellness" aesthetic toward a calm, neutral, minimal design language.
+
+---
+
+## Color Palette
+
+### Primary Background Colors
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--bg-deep` | `#1A1918` | Deepest background, app shell |
+| `--bg-base` | `#252322` | Primary surface color |
+| `--bg-elevated` | `#2E2B29` | Elevated surfaces, cards |
+| `--bg-subtle` | `#3A3634` | Subtle differentiation |
+
+### Neutral Tones
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--stone-900` | `#1C1B1A` | Darkest stone |
+| `--stone-800` | `#292725` | Dark stone |
+| `--stone-700` | `#3D3936` | Medium dark stone |
+| `--stone-600` | `#57524D` | Medium stone |
+| `--stone-500` | `#787168` | Neutral mid-tone |
+| `--stone-400` | `#9C9488` | Light stone |
+| `--stone-300` | `#C4BAA8` | Sand / warm light |
+| `--stone-200` | `#E0D6C8` | Off-white warm |
+| `--stone-100` | `#F2EDE5` | Foggy off-white |
+
+### Text Colors
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--text-primary` | `rgba(242, 237, 229, 0.92)` | Primary text |
+| `--text-secondary` | `rgba(242, 237, 229, 0.65)` | Secondary text |
+| `--text-tertiary` | `rgba(242, 237, 229, 0.45)` | Tertiary / labels |
+| `--text-muted` | `rgba(242, 237, 229, 0.28)` | Muted / hints |
+
+### Accent (Use Sparingly)
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--accent-warm` | `#A89888` | Subtle warm accent, never dominant |
+| `--accent-fog` | `#8A9090` | Cool neutral accent |
+
+### Colors Explicitly Removed
+
+- `#1C1F1B` (green-tinted dark)
+- `#262B25` (green-tinted surface)
+- `rgba(20,24,20,...)` (green glass tints)
+- Any saturated greens, teals, or nature-coded colors
+
+---
+
+## Background Imagery Rules
+
+### Allowed
+
+- **Fog** — soft, atmospheric, no defined horizon
+- **Water** — calm, abstract reflections, no waves
+- **Stone** — texture, minimal detail, neutral tones
+- **Sky** — overcast, pre-dawn, dusk, no sun
+- **Snow** — quiet, muted, no harsh whites
+- **Sand** — dunes, beach at dusk, abstract forms
+
+### Forbidden
+
+- Grass
+- Leaves
+- Trees (unless extremely abstracted silhouettes)
+- Forests
+- Flowers or plants
+- Any "wellness stock" imagery
+- High saturation nature
+- Recognizable landmarks or destinations
+
+### Treatment
+
+- Desaturated (50-70% saturation reduction)
+- Low contrast (compress highlights and shadows)
+- Subtle blur or grain
+- Dark vignette toward edges
+- Should feel like a quiet place, not a destination
+
+### Example CSS Filter
+
+```css
+filter: brightness(0.55) saturate(0.4) contrast(0.88);
+```
+
+---
+
+## Liquid Glass Layer
+
+### Principles
+
+The glass layer creates depth without weight. It should feel like looking through still water or morning fog.
+
+### Properties
+
+```css
+.glass-surface {
+  /* Base — barely there */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+
+  /* Blur — soft, not crisp */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  /* Border — whisper thin */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  /* Radius — generous, soft */
+  border-radius: 24px;
+
+  /* Shadow — depth without drama */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+```
+
+### What to Avoid
+
+- High opacity backgrounds (>15% white)
+- Strong border highlights
+- Glossy or shiny reflections
+- Hard edges
+- Multiple layered glass elements
+- Drop shadows that feel "lifted"
+
+---
+
+## Layout Principles
+
+### Orientation from Reference (Third Image)
+
+The third reference image establishes the core layout philosophy:
+
+1. **Centered Composition**
+   - Primary content anchored to center
+   - Symmetry creates stillness
+   - Avoid left/right asymmetry
+
+2. **Clear Hierarchy**
+   - One primary element at a time
+   - Supporting text clearly subordinate
+   - No competing focal points
+
+3. **Generous Negative Space**
+   - Minimum 24px between distinct elements
+   - Prefer 40-60px for section breaks
+   - Let the background breathe
+
+4. **Minimal Controls**
+   - One primary action visible
+   - Secondary actions de-emphasized or hidden
+   - No toolbar-style interfaces
+
+### Specific Rules
+
+- **No cards unless necessary** — prefer floating text
+- **No decorative elements** — every element has function
+- **No illustrations** — photography or abstract only
+- **No icons unless essential** — prefer text labels
+- **Bottom navigation** — glass, minimal, 3 items max
+
+### Spacing Scale
+
+```
+4px   — micro (internal padding)
+8px   — tight (related elements)
+16px  — base (standard spacing)
+24px  — comfortable (distinct elements)
+40px  — generous (section breaks)
+64px  — expansive (major divisions)
+```
+
+---
+
+## Typography Direction
+
+### Font Family
+
+```css
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+```
+
+### Font Weights
+
+| Weight | Usage |
+|--------|-------|
+| 300 (Light) | Primary body text, numbers |
+| 400 (Regular) | Secondary text, labels |
+| 500 (Medium) | Buttons, emphasis |
+
+### Sizing
+
+| Role | Size | Tracking |
+|------|------|----------|
+| Display | 28-32px | -0.02em |
+| Heading | 18-22px | -0.01em |
+| Body | 15-16px | 0 |
+| Label | 10-11px | 0.15-0.2em (uppercase) |
+| Caption | 12-13px | 0.02em |
+
+### Rules
+
+- **No playful or rounded fonts**
+- **No wellness or lifestyle typefaces** (Avenir, Lato, Circular)
+- **Uppercase sparingly** — labels only, always tracked
+- **Numbers** — tabular-nums for timers
+- **Text should feel quiet and confident**
+
+---
+
+## What Was Removed
+
+### Colors
+- [x] Green-tinted background (`#1C1F1B`, `#262B25`)
+- [x] Green glass overlays (`rgba(20,24,20,...)`)
+- [x] Any saturated nature-coded colors
+
+### Imagery
+- [x] Grass background (`/backgrounds/grass.jpg`)
+- [x] `grassDrift` animation
+- [x] Nature-literal visual language
+
+### Glass Treatment
+- [x] High-opacity glass (>14% white)
+- [x] Strong border highlights (>14% white)
+- [x] Green-tinted shadow colors
+
+### Typography (if present)
+- [x] Any rounded or playful fonts
+- [x] High-contrast text treatments
+
+---
+
+## Implementation Notes
+
+### CSS Variables to Update
+
+```css
+:root {
+  /* REPLACE */
+  --bg0: #1A1918;        /* was #1C1F1B */
+  --bg1: #252322;        /* was #262B25 */
+
+  /* TEXT — warm off-white base */
+  --text: rgba(242, 237, 229, 0.92);
+  --text-secondary: rgba(242, 237, 229, 0.65);
+  --text-tertiary: rgba(242, 237, 229, 0.45);
+  --text-muted: rgba(242, 237, 229, 0.28);
+
+  /* Legacy aliases — update to match */
+  --muted: rgba(242, 237, 229, 0.45);
+  --accent: rgba(242, 237, 229, 0.65);
+}
+```
+
+### Background Replacement
+
+Replace grass.jpg with atmospheric abstract image:
+- Fog over water
+- Overcast sky gradient
+- Abstract stone texture
+- Pre-dawn horizon
+
+### Glass Material Update
+
+Reduce opacity, remove green tints:
+
+```css
+.glass {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  /* ... rest unchanged ... */
+}
+```
+
+---
+
+## Design Principles Summary
+
+1. **Calm** — Nothing demands attention
+2. **Neutral** — No thematic color coding
+3. **Minimal** — Only what's necessary
+4. **Timeless** — No trends, no decoration
+5. **Adult** — Confident, not precious
+6. **Atmospheric** — Environment, not illustration
+
+The result should feel like a design object that happens to guide meditation — not a meditation app that tries to look calming.
+
+---
+
 *Last updated: January 2025*
