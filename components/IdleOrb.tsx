@@ -41,6 +41,7 @@ type IdleOrbProps = {
   progress?: number; // 0-1 for active mode
   timeDisplay?: string; // e.g. "5:32" for active mode
   size?: number; // px, default 280
+  paused?: boolean; // Pause tectonic animation
 };
 
 // Animation parameters per state
@@ -130,6 +131,7 @@ export function IdleOrb({
   progress = 0,
   timeDisplay,
   size = 280,
+  paused = false,
 }: IdleOrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
@@ -332,9 +334,14 @@ export function IdleOrb({
   const ringRadius = size / 2 - 20;
   const circumference = 2 * Math.PI * ringRadius;
 
+  // Tectonic pulse only during active session, stops when paused
+  const pulseClass = mode === 'active'
+    ? `tectonic-pulse${paused ? ' paused' : ''}`
+    : '';
+
   return (
     <div
-      className="relative"
+      className={`relative ${pulseClass}`}
       style={{ width: size, height: size }}
     >
       {/* Canvas for particle system - softened edges */}
@@ -357,7 +364,7 @@ export function IdleOrb({
             cy={size / 2}
             r={ringRadius}
             fill="none"
-            stroke="rgba(157, 170, 149, 0.08)"
+            stroke="rgba(58, 52, 48, 0.3)"
             strokeWidth="2"
           />
           {/* Progress */}
@@ -366,8 +373,8 @@ export function IdleOrb({
             cy={size / 2}
             r={ringRadius}
             fill="none"
-            stroke="rgba(157, 170, 149, 0.5)"
-            strokeWidth="3"
+            stroke="rgba(168, 162, 155, 0.35)"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={(1 - progress) * circumference}

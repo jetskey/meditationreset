@@ -431,6 +431,7 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
           progress={progress}
           timeDisplay={showTime ? timeDisplay : undefined}
           size={280}
+          paused={phase === 'paused'}
         />
 
         {/* Pause overlay */}

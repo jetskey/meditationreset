@@ -270,4 +270,227 @@ Like a device operating in low light on another planet.
 
 ---
 
+---
+
+# MOTION SYSTEM — Tectonic Pulse
+
+This section defines the EXACT animation behavior for the circular meditation element.
+
+Reference: Atmospheric pressure. Slow tectonic movement. Magnetic fluctuation. Living system under the surface.
+
+NOT: Breathing. Heartbeat. Spiritual. Wellness. Smooth perfection.
+
+---
+
+## 1. PULSE BEHAVIOR DESCRIPTION
+
+The circular mass exhibits slow, irregular, barely-perceptible movement.
+
+**Character:**
+- Organic but mechanical
+- Alive but not biological
+- Subtle to the point of uncertainty
+- Non-rhythmic, non-symmetrical
+
+**Metaphor:**
+- Atmospheric pressure shifting
+- Tectonic plates settling
+- Magnetic field fluctuation
+- Something massive beneath the surface
+
+---
+
+## 2. ANIMATED PROPERTIES (EXACT)
+
+Animate ONLY these properties:
+
+### Primary: Scale
+```css
+transform: scale(X);
+```
+- Range: 0.985 – 1.015 (±1.5%)
+- Variation: Non-uniform, asymmetric
+
+### Secondary: Opacity
+```css
+opacity: X;
+```
+- Range: 0.95 – 1.0 (±5%)
+- Variation: Slight drift, not pulsing
+
+### Optional: Inner Shadow Intensity
+```css
+box-shadow: inset 0 2px Xpx rgba(0,0,0,Y);
+```
+- Blur range: 18px – 22px
+- Opacity range: 0.75 – 0.85
+- Extremely subtle
+
+---
+
+## 3. TIMING + EASING (EXACT)
+
+### Cycle Duration
+- Base: 7 seconds
+- Variation: ±1.5 seconds per cycle (5.5s – 8.5s)
+- Implemented via randomized delay offset
+
+### Easing
+```css
+/* Heavy, asymmetric easing */
+cubic-bezier(0.4, 0.0, 0.2, 1)  /* ease-out heavy */
+cubic-bezier(0.6, 0.0, 0.4, 1)  /* slow start, slow end */
+```
+
+### Non-Deterministic Offset
+Each animation cycle starts with slight random variation:
+```javascript
+const offset = Math.random() * 0.3; // 0-30% phase offset
+```
+
+### Forbidden Timing
+- NO 1s, 2s, 3s loops
+- NO metronomic timing
+- NO predictable repetition
+- NO sync to audio or timer
+
+---
+
+## 4. AMPLITUDE CONSTRAINTS (STRICT)
+
+All changes must be **barely perceptible**.
+
+| Property | Min | Max | If Noticeable |
+|----------|-----|-----|---------------|
+| Scale | 0.985 | 1.015 | TOO STRONG |
+| Opacity | 0.95 | 1.0 | TOO STRONG |
+| Shadow blur | 18px | 22px | TOO STRONG |
+
+**Test:** If a user consciously notices the animation → reduce amplitude by 50%.
+
+---
+
+## 5. SESSION STATE HANDLING
+
+### Active During:
+- `playing` state ONLY
+
+### Paused Behavior:
+- Animation STOPS immediately
+- Holds current position (no snap)
+- NO fade out of animation
+
+### Resume Behavior:
+- Continues from held position
+- NO restart jump
+- NO re-trigger effect
+
+### Completion:
+- Animation stops
+- Element holds final state
+- NO celebratory pulse
+
+### Implementation:
+```javascript
+const isAnimating = sessionPhase === 'playing';
+// Pass to component, conditionally apply animation
+```
+
+---
+
+## 6. AVOIDED ANIMATION PATTERNS (EXPLICIT)
+
+### DO NOT Implement:
+- [x] Breathing guidance (inhale/exhale)
+- [x] Pulse synced to time remaining
+- [x] Audio-reactive visuals
+- [x] Heartbeat rhythm
+- [x] Spiritual glow
+- [x] Meditation halo
+- [x] Particle effects
+- [x] Rotating elements
+- [x] Progress ring animation
+- [x] Light pulses
+- [x] Dot patterns
+- [x] Expanding circles
+- [x] Wave effects
+
+### This is NOT:
+- A living being
+- A breathing guide
+- A spiritual symbol
+- A wellness indicator
+
+### This IS:
+- A system under slow pressure
+- A mass with internal forces
+- Geological, not biological
+
+---
+
+## 7. IMPLEMENTATION NOTES
+
+### CSS Keyframes (Primary Animation):
+```css
+@keyframes tectonicPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.012);
+    opacity: 0.97;
+  }
+  70% {
+    transform: scale(0.988);
+    opacity: 0.98;
+  }
+}
+```
+
+### Application:
+```css
+.orb-pulse {
+  animation: tectonicPulse 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.orb-pulse.paused {
+  animation-play-state: paused;
+}
+```
+
+### JavaScript Variation (Optional):
+```javascript
+// Add slight phase variation on each cycle
+useEffect(() => {
+  const variation = 0.8 + Math.random() * 0.4; // 0.8-1.2x
+  element.style.animationDuration = `${7 * variation}s`;
+}, [cycle]);
+```
+
+### Performance:
+- Use `transform` and `opacity` only (GPU accelerated)
+- NO `width`, `height`, `box-shadow` animation (causes reflow)
+- Use `will-change: transform, opacity` sparingly
+
+---
+
+## CONSTRAINTS (ABSOLUTE)
+
+- Do NOT make it soothing through rhythm
+- Do NOT make it meditative through breath metaphors
+- Do NOT add visual noise or particles
+- Do NOT sync to any external timing
+- Do NOT make it "feel alive" through cuteness
+
+The animation must feel:
+- Quiet
+- Alive
+- Slightly unpredictable
+- Deeply restrained
+
+Like something massive, slow, and ongoing beneath the surface.
+
+---
+
 *Executed: January 2025*
