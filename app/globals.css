@@ -1,22 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* BACKGROUND — warm charcoal, no green */
-  --bg0: #1A1918;
-  --bg1: #252322;
-  --bg-elevated: #2E2B29;
+  /* BACKGROUNDS */
+  --bg-primary: #E6E3DE;
+  --bg-secondary: #DAD6D0;
 
-  /* TEXT — warm off-white base */
-  --text: rgba(242, 237, 229, 0.92);
-  --text-secondary: rgba(242, 237, 229, 0.65);
-  --text-tertiary: rgba(242, 237, 229, 0.45);
-  --text-muted: rgba(242, 237, 229, 0.28);
+  /* TEXT */
+  --text-primary: #1F1F1F;
+  --text-secondary: #5A5A5A;
 
-  /* Legacy aliases */
-  --muted: rgba(242, 237, 229, 0.45);
-  --accent: rgba(242, 237, 229, 0.65);
+  /* DIVIDERS */
+  --divider: #C9C5BF;
+
+  /* Legacy aliases for compatibility */
+  --bg0: #E6E3DE;
+  --bg1: #DAD6D0;
+  --text: #1F1F1F;
+  --text-tertiary: #5A5A5A;
+  --text-muted: rgba(31, 31, 31, 0.35);
+  --muted: rgba(31, 31, 31, 0.5);
+  --accent: rgba(31, 31, 31, 0.65);
 }
 
 * {
@@ -32,10 +39,10 @@ html, body {
 }
 
 body {
-  background-color: var(--bg0);
-  color: var(--text);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.5;
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: 'Arimo', sans-serif;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -58,7 +65,6 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Combined safe area for full-bleed layouts */
 .safe-inset {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -66,60 +72,31 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Subtle animations for state transitions */
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — Minimal, functional only
+   ═══════════════════════════════════════════════════════════════ */
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Slow orbital rotation for idle element */
-@keyframes orbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Gentle pulse for signal dot */
 @keyframes pulse {
-  0%, 100% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-}
-
-/* Background noise texture */
-.noise-overlay {
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   APP SHELL — Minimal container for page content
+   APP SHELL
    ═══════════════════════════════════════════════════════════════ */
 
 .app-shell {
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  min-height: 100dvh;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE BASE — Each page must be opaque and self-contained
+   PAGE BASE
    ═══════════════════════════════════════════════════════════════ */
 
 .page {
@@ -128,25 +105,16 @@ body {
   width: 100%;
   position: relative;
   overflow: hidden;
-  /* Transparent to show global nature background from layout */
-  background: transparent;
+  background: var(--bg-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME BREATHING — Subtle alive feeling in idle state
-
-   Applied to orb container on Home when readiness === 'idle'.
-   Slow, gentle scale animation communicates "ready, waiting".
-   Stops when session starts or completes.
+   HOME BREATHING — Subtle idle animation
    ═══════════════════════════════════════════════════════════════ */
 
 @keyframes homeBreathing {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
 .home-breathing {
@@ -154,22 +122,13 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SESSION START PULSE — Subtle confirmation of session beginning
-
-   Single gentle pulse when session starts.
-   Communicates "the session has begun" without sound or text.
+   SESSION START PULSE
    ═══════════════════════════════════════════════════════════════ */
 
 @keyframes sessionStartPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
 }
 
 .session-start-pulse {
@@ -177,17 +136,12 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE ENTRANCE — Subtle native-feeling fade
-   Applied to page content for smooth transitions
+   PAGE ENTRANCE
    ═══════════════════════════════════════════════════════════════ */
 
 @keyframes pageEntrance {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .page-entrance {
@@ -195,7 +149,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   BUTTON PRESS — Native-feeling interaction feedback
+   BUTTON PRESS
    ═══════════════════════════════════════════════════════════════ */
 
 .button-press {
@@ -208,193 +162,114 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GLOBAL BACKGROUND — Atmospheric gradient (fog/stone aesthetic)
+   GLOBAL BACKGROUND — Solid, no imagery
    ═══════════════════════════════════════════════════════════════ */
 
 #app-background {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(
-      ellipse 120% 100% at 50% 0%,
-      #2A2826 0%,
-      #1A1918 50%,
-      #141312 100%
-    );
-}
-
-/* Subtle fog layer */
-#app-background::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 50% 100%,
-      rgba(60, 55, 50, 0.3) 0%,
-      transparent 70%
-    );
-  pointer-events: none;
-}
-
-/* Gentle noise texture */
-#app-background::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background: var(--bg-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LANDING VEIL — Subtle depth focus
+   LANDING VEIL — Subtle depth
    ═══════════════════════════════════════════════════════════════ */
 
 .landing-veil {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 0%,
-    rgba(20, 19, 18, 0.4) 80%
-  );
+  background: transparent;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GLASS MATERIAL — Liquid glass, subtle and neutral
+   GLASS MATERIAL — Functional, minimal
    ═══════════════════════════════════════════════════════════════ */
 
 .glass {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.02)
-  );
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px;
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(230, 227, 222, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
 }
 
-/* Legacy aliases - use .glass instead */
 .glass-card {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.02)
-  );
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px;
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(230, 227, 222, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
 }
 
 .glass-button {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.08),
-    rgba(255,255,255,0.04)
-  );
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(218, 214, 208, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
   transition: background 150ms ease-out;
 }
 
 .glass-button:hover,
 .glass-button:active {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.10),
-    rgba(255,255,255,0.06)
-  );
+  background: rgba(201, 197, 191, 0.9);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   BOTTOM NAVIGATION — Subtle glass with rounded top
+   BOTTOM NAVIGATION
    ═══════════════════════════════════════════════════════════════ */
 
 .bottom-nav {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.05),
-    rgba(255,255,255,0.02)
-  );
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-bottom: none;
-  border-radius: 24px 24px 0 0;
-  box-shadow:
-    0 -4px 24px rgba(0,0,0,0.2),
-    inset 0 1px 0 rgba(255,255,255,0.03);
+  background: rgba(230, 227, 222, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--divider);
+  border-radius: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE GLASS — Session + Stats floating panel
+   PAGE GLASS — Floating panel
    ═══════════════════════════════════════════════════════════════ */
 
 .page-glass {
-  background: linear-gradient(
-    to bottom,
-    rgba(37, 35, 34, 0.6),
-    rgba(26, 25, 24, 0.7)
-  );
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 28px;
-  box-shadow:
-    0 16px 48px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+  background: rgba(230, 227, 222, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
   padding: 28px 24px;
   max-width: 720px;
   margin: 0 auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SESSION CARD — Minimal embedded list items
+   SESSION CARD
    ═══════════════════════════════════════════════════════════════ */
 
 .session-card {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.04),
-    rgba(255,255,255,0.02)
-  );
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 20px;
+  background: rgba(218, 214, 208, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--divider);
+  border-radius: 12px;
   transition: background 150ms ease-out, transform 150ms ease-out;
 }
 
 .session-card:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.03)
-  );
+  background: rgba(201, 197, 191, 0.7);
 }
 
 .session-card:active {
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.03)
-  );
+  background: rgba(201, 197, 191, 0.7);
   transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NOISE OVERLAY — Removed (not needed for light theme)
+   ═══════════════════════════════════════════════════════════════ */
+
+.noise-overlay {
+  display: none;
 }

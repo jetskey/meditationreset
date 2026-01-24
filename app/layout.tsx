@@ -1,27 +1,21 @@
 /**
  * ROOT LAYOUT
- * - Global nature background with blur
- * - Inter font only
+ * - Arimo font only
+ * - Light theme (#E6E3DE)
  */
 
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { TabBar } from '@/components/TabBar';
 import { Providers } from '@/components/Providers';
 import WelcomeAudioOverlay from '@/components/WelcomeAudioOverlay';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
 
 export const metadata: Metadata = {
   title: 'Idle - Daily Reset',
   description: 'A minimalist app for mental clarity',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'Idle',
   },
 };
@@ -31,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0a0c0a',
+  themeColor: '#E6E3DE',
   viewportFit: 'cover',
 };
 
@@ -41,9 +35,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en">
       <body>
-        {/* Global grass background - all pages share this environment */}
+        {/* Solid background */}
         <div id="app-background" />
 
         <WelcomeAudioOverlay />
