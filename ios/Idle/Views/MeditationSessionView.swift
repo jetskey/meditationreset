@@ -1,31 +1,36 @@
 import SwiftUI
 import AVFoundation
 
-/// Meditation session screen - matches web app
 struct MeditationSessionView: View {
-    let playExplanation: Bool
-
     @Environment(\.dismiss) private var dismiss
     @StateObject private var audio = SessionAudioPlayer()
+
+    // Stats storage
+    @AppStorage("totalFocusSeconds") private var totalFocusSeconds: Int = 0
+    @AppStorage("currentStreak") private var currentStreak: Int = 0
+    @AppStorage("lastSessionDate") private var lastSessionDate: String = ""
     @AppStorage("sessionsToday") private var sessionsToday: Int = 0
+    @AppStorage("sessionsTodayDate") private var sessionsTodayDate: String = ""
 
     @State private var showExit = false
+    @State private var hasRecorded = false  // Prevent double recording
 
     var body: some View {
         ZStack {
-            // Black background
-            Color.black.ignoresSafeArea()
+            Color.black
+                .ignoresSafeArea()
 
             if audio.isComplete {
-                completionView
+                completionContent
             } else {
-                sessionView
+                sessionContent
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
-            audio.begin(playExplanation: playExplanation)
+            resetSessionsTodayIfNeeded()
+            audio.begin()
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
@@ -33,43 +38,43 @@ struct MeditationSessionView: View {
         }
     }
 
-    private var sessionView: some View {
+    // MARK: - Session Content
+
+    private var sessionContent: some View {
         VStack(spacing: 0) {
-            // Exit button
             HStack {
                 Button {
-                    sessionsToday += 1
+                    recordSessionIfNeeded()
                     audio.stop()
                     dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 20))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.white.opacity(showExit ? 0.5 : 0.15))
                 }
                 Spacer()
+                Text(audio.phase == .explanation ? "EXPLANATION" : "SESSION")
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.5)
+                    .foregroundColor(.white.opacity(0.35))
+                Spacer()
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.clear)
             }
             .padding(.horizontal, 32)
-            .padding(.top, 60)
+            .padding(.top, 8)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            // Session label
-            Text("SESSION")
-                .font(.system(size: 11, weight: .medium))
-                .tracking(1.5)
-                .foregroundColor(.white.opacity(0.35))
-                .padding(.bottom, 40)
-
-            // Orb with time
             IdleOrbView(
-                mode: .active,
+                mode: audio.phase == .explanation ? .entering : .active,
                 progress: audio.progress,
-                timeDisplay: audio.timeDisplay,
+                timeDisplay: audio.phase == .playing ? audio.timeDisplay : nil,
                 size: 260
             )
 
-            Spacer()
-            Spacer()
+            Spacer(minLength: 0)
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -80,16 +85,17 @@ struct MeditationSessionView: View {
         }
     }
 
-    private var completionView: some View {
+    // MARK: - Completion Content
+
+    private var completionContent: some View {
         VStack(spacing: 0) {
-            Spacer()
+            Spacer(minLength: 0)
 
             IdleOrbView(mode: .complete, size: 180)
                 .padding(.bottom, 48)
 
             Text("+\(formatTime(audio.elapsedSeconds))")
-                .font(.system(size: 48, weight: .medium))
-                .monospacedDigit()
+                .font(.system(size: 48, weight: .medium).monospacedDigit())
                 .foregroundColor(.white.opacity(0.85))
 
             Text("Complete.")
@@ -97,25 +103,79 @@ struct MeditationSessionView: View {
                 .foregroundColor(.white.opacity(0.6))
                 .padding(.top, 16)
 
-            Spacer()
+            Spacer(minLength: 0)
 
             Text("TAP TO CONTINUE")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.5)
                 .foregroundColor(.white.opacity(0.25))
-                .padding(.bottom, 60)
+                .padding(.bottom, 40)
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            sessionsToday += 1
+            recordSessionIfNeeded()
             dismiss()
         }
         .onAppear {
+            // Record immediately on completion
+            recordSessionIfNeeded()
+            // Auto-dismiss after delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                sessionsToday += 1
                 dismiss()
             }
         }
+    }
+
+    // MARK: - Stats Logic
+
+    private func resetSessionsTodayIfNeeded() {
+        let today = getTodayISO()
+        if sessionsTodayDate != today {
+            sessionsToday = 0
+            sessionsTodayDate = today
+        }
+    }
+
+    private func recordSessionIfNeeded() {
+        guard !hasRecorded else { return }
+        hasRecorded = true
+
+        let seconds = audio.elapsedSeconds
+        guard seconds >= 60 else { return }  // Minimum 1 minute
+
+        let today = getTodayISO()
+        let yesterday = getYesterdayISO()
+
+        // Always add focus time
+        totalFocusSeconds += seconds
+
+        // Update streak (only changes once per day)
+        if lastSessionDate == yesterday {
+            // Continuing streak from yesterday
+            currentStreak += 1
+        } else if lastSessionDate != today {
+            // Starting fresh (either first session or broke streak)
+            currentStreak = 1
+        }
+        // If lastSessionDate == today, streak stays same (already counted today)
+
+        // Update session count and date
+        sessionsToday += 1
+        sessionsTodayDate = today
+        lastSessionDate = today
+    }
+
+    private func getTodayISO() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
+
+    private func getYesterdayISO() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        return formatter.string(from: yesterday)
     }
 
     private func formatTime(_ seconds: Int) -> String {
@@ -127,49 +187,96 @@ struct MeditationSessionView: View {
     }
 }
 
-// Session audio player
+// MARK: - Session Phase
+
+enum SessionPhase {
+    case explanation
+    case playing
+    case completing
+}
+
+// MARK: - Audio Player
+
 class SessionAudioPlayer: ObservableObject {
     @Published var progress: Double = 0
     @Published var timeDisplay: String = "7:00"
     @Published var elapsedSeconds: Int = 0
     @Published var isComplete: Bool = false
+    @Published var phase: SessionPhase = .explanation
 
-    private var player: AVAudioPlayer?
+    private var explanationPlayer: AVAudioPlayer?
+    private var meditationPlayer: AVAudioPlayer?
     private var timer: Timer?
-    private let duration: Double = 420 // 7 minutes
+    private let duration: Double = 420
+
+    @AppStorage("hasHeardExplanation") private var hasHeardExplanation: Bool = false
 
     init() {
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true)
     }
 
-    func begin(playExplanation: Bool) {
-        // For now, skip explanation and go straight to meditation
+    func begin() {
         if let url = Bundle.main.url(forResource: "finalaudioidle", withExtension: "mp3") {
-            player = try? AVAudioPlayer(contentsOf: url)
-            player?.volume = 0
-            player?.play()
-
-            // Fade in
-            Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] timer in
-                guard let self = self, let player = self.player else {
-                    timer.invalidate()
-                    return
-                }
-                if player.volume < 0.8 {
-                    player.volume += 0.02
-                } else {
-                    timer.invalidate()
-                }
-            }
-
-            startProgressTimer()
+            meditationPlayer = try? AVAudioPlayer(contentsOf: url)
+            meditationPlayer?.prepareToPlay()
         }
+
+        if !hasHeardExplanation {
+            if let url = Bundle.main.url(forResource: "explanation", withExtension: "m4a") {
+                explanationPlayer = try? AVAudioPlayer(contentsOf: url)
+                explanationPlayer?.prepareToPlay()
+                playExplanation()
+            } else {
+                hasHeardExplanation = true
+                startMeditation()
+            }
+        } else {
+            phase = .playing
+            startMeditation()
+        }
+    }
+
+    private func playExplanation() {
+        phase = .explanation
+        hasHeardExplanation = true
+
+        explanationPlayer?.volume = 0
+        explanationPlayer?.play()
+
+        Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] t in
+            guard let self, let p = self.explanationPlayer else { t.invalidate(); return }
+            if p.volume < 0.9 { p.volume += 0.03 } else { t.invalidate() }
+        }
+
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self, let p = self.explanationPlayer else { return }
+            if !p.isPlaying && p.currentTime > 0 {
+                self.timer?.invalidate()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { self.startMeditation() }
+            }
+        }
+    }
+
+    private func startMeditation() {
+        phase = .playing
+        guard let player = meditationPlayer else { return }
+
+        player.volume = 0
+        player.play()
+
+        Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] t in
+            guard let self, let p = self.meditationPlayer else { t.invalidate(); return }
+            if p.volume < 0.8 { p.volume += 0.02 } else { t.invalidate() }
+        }
+
+        startProgressTimer()
     }
 
     func stop() {
         timer?.invalidate()
-        player?.stop()
+        explanationPlayer?.stop()
+        meditationPlayer?.stop()
     }
 
     private func startProgressTimer() {
@@ -179,7 +286,7 @@ class SessionAudioPlayer: ObservableObject {
     }
 
     private func updateProgress() {
-        guard let player = player else { return }
+        guard let player = meditationPlayer else { return }
 
         let current = min(player.currentTime, duration)
         let remaining = max(0, duration - current)
@@ -193,21 +300,16 @@ class SessionAudioPlayer: ObservableObject {
 
         if current >= duration || !player.isPlaying {
             timer?.invalidate()
+            phase = .completing
 
-            // Fade out
-            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
-                guard let self = self, let player = self.player else {
-                    timer.invalidate()
-                    return
-                }
-                if player.volume > 0.05 {
-                    player.volume -= 0.05
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] t in
+                guard let self, let p = self.meditationPlayer else { t.invalidate(); return }
+                if p.volume > 0.05 {
+                    p.volume -= 0.05
                 } else {
-                    player.stop()
-                    timer.invalidate()
-                    DispatchQueue.main.async {
-                        self.isComplete = true
-                    }
+                    p.stop()
+                    t.invalidate()
+                    DispatchQueue.main.async { self.isComplete = true }
                 }
             }
         }

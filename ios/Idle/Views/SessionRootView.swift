@@ -1,24 +1,30 @@
 import SwiftUI
 
 struct SessionRootView: View {
-    @State private var showWelcome = !UserDefaults.standard.hasSeenWelcomeAudio
+    // Use a different key to reset for testing, or delete app to reset
+    @AppStorage("hasSeenWelcomeAudio") private var hasSeenWelcome: Bool = false
+    @State private var showWelcomeOverlay: Bool = false
 
     var body: some View {
         ZStack {
-            // Always black background
-            Color.black.ignoresSafeArea()
+            // Main app content
+            MainTabView()
 
-            // Home view underneath
-            HomeView()
-
-            // Welcome overlay on top (first launch only)
-            if showWelcome {
+            // Welcome overlay - shown on first launch only
+            if showWelcomeOverlay {
                 WelcomeAudioOverlay {
-                    withAnimation(.easeOut(duration: 0.6)) {
-                        showWelcome = false
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        showWelcomeOverlay = false
                     }
                 }
                 .transition(.opacity)
+                .zIndex(100)
+            }
+        }
+        .onAppear {
+            // Show welcome on first launch
+            if !hasSeenWelcome {
+                showWelcomeOverlay = true
             }
         }
     }

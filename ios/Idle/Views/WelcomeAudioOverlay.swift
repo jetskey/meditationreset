@@ -1,22 +1,49 @@
 import SwiftUI
 import AVFoundation
 
-/// Welcome overlay with typewriter text - auto-starts, has skip button
+/// Welcome overlay - shows on first app launch with audio and typewriter text
 struct WelcomeAudioOverlay: View {
     var onFinished: () -> Void
 
-    @StateObject private var audio = WelcomeAudioPlayer()
-    @State private var displayedText: String = ""
+    @AppStorage("hasSeenWelcomeAudio") private var hasSeenWelcome: Bool = false
+    @State private var displayedCharacterCount: Int = 0
+    @State private var audioPlayer: AVAudioPlayer?
+    @State private var typewriterTimer: Timer?
+    @State private var checkTimer: Timer?
+
+    private let welcomeText = """
+Welcome to idle.
+
+idle is a simple practice to create space between you and your thoughts.
+
+You're not trying to control your mind or reach a special state.
+
+You're practicing stepping back, so thoughts can be there without pulling you in.
+
+What matters most is consistency.
+
+A few minutes, done regularly, work better than occasional long sessions.
+
+Let's begin.
+"""
+
+    // Characters per second for typewriter effect
+    private let typewriterSpeed: Double = 18
+
+    private var displayedText: String {
+        String(welcomeText.prefix(displayedCharacterCount))
+    }
 
     var body: some View {
         ZStack {
-            // Black background
-            Color.black.ignoresSafeArea()
+            // Full screen black background
+            Color.black
+                .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 // Top label
                 Text("WELCOME")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
                     .tracking(1.2)
                     .foregroundColor(.white.opacity(0.4))
                     .padding(.top, 60)
@@ -24,107 +51,128 @@ struct WelcomeAudioOverlay: View {
 
                 Spacer()
 
-                // Typewriter text
-                Text(displayedText)
-                    .font(.system(size: 18, weight: .regular, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.9))
-                    .lineSpacing(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 32)
+                // Welcome text with typewriter effect
+                ScrollView(showsIndicators: false) {
+                    Text(displayedText)
+                        .font(.system(size: 16, weight: .regular, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineSpacing(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 20)
+                }
 
                 Spacer()
 
-                // Skip button
+                // Continue button
                 Button {
-                    audio.stop()
-                    UserDefaults.standard.hasSeenWelcomeAudio = true
-                    onFinished()
+                    finishWelcome()
                 } label: {
-                    Text("Skip")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.5))
+                    Text("Continue")
+                        .font(.system(size: 15, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.85))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(
+                            RoundedRectangle(cornerRadius: 28)
+                                .fill(Color.white.opacity(0.06))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 28)
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                )
+                        )
                 }
                 .padding(.horizontal, 32)
-                .padding(.bottom, 40)
+                .padding(.bottom, 16)
+
+                // Skip button
+                Button {
+                    finishWelcome()
+                } label: {
+                    Text("Skip")
+                        .font(.system(size: 14, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.4))
+                }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 50)
             }
         }
         .onAppear {
-            audio.play()
+            startWelcome()
         }
-        .onReceive(audio.$currentText) { text in
-            displayedText = text
+        .onDisappear {
+            stopAll()
         }
-        .onReceive(audio.$isFinished) { finished in
-            if finished {
-                UserDefaults.standard.hasSeenWelcomeAudio = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    onFinished()
+    }
+
+    private func startWelcome() {
+        // Setup audio session
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("[Welcome] Audio session error: \(error)")
+        }
+
+        // Load and play audio
+        if let url = Bundle.main.url(forResource: "idle-welcome", withExtension: "mp3") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer?.prepareToPlay()
+                audioPlayer?.play()
+                print("[Welcome] Audio started playing")
+            } catch {
+                print("[Welcome] Audio load error: \(error)")
+            }
+        } else {
+            print("[Welcome] Audio file not found: idle-welcome.mp3")
+        }
+
+        // Start typewriter effect
+        let interval = 1.0 / typewriterSpeed
+        typewriterTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            if displayedCharacterCount < welcomeText.count {
+                displayedCharacterCount += 1
+            } else {
+                typewriterTimer?.invalidate()
+                typewriterTimer = nil
+            }
+        }
+
+        // Mark as seen
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            hasSeenWelcome = true
+        }
+
+        // Setup timer to check for audio completion
+        checkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            if let player = audioPlayer, !player.isPlaying && player.currentTime > 0 {
+                checkTimer?.invalidate()
+                checkTimer = nil
+                // Show remaining text immediately when audio ends
+                displayedCharacterCount = welcomeText.count
+                typewriterTimer?.invalidate()
+                typewriterTimer = nil
+                // Auto-dismiss after audio ends
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    finishWelcome()
                 }
             }
         }
     }
-}
 
-// Simple audio player with text sync
-class WelcomeAudioPlayer: ObservableObject {
-    @Published var currentText: String = ""
-    @Published var isFinished: Bool = false
-
-    private var player: AVAudioPlayer?
-    private var timer: Timer?
-
-    private let sentences: [(time: Double, text: String)] = [
-        (0.0, "Welcome to idle."),
-        (2.2, "\n\nidle is a simple practice to create space between you and your thoughts."),
-        (7.2, "\n\nYou're not trying to control your mind or reach a special state."),
-        (12.2, "\n\nYou're practicing stepping back, so thoughts can be there without pulling you in."),
-        (19.2, "\n\nWhat matters most is consistency."),
-        (22.8, "\n\nA few minutes, done regularly, work better than occasional long sessions."),
-        (27.0, "\n\nLet's begin.")
-    ]
-
-    init() {
-        try? AVAudioSession.sharedInstance().setCategory(.playback)
-        try? AVAudioSession.sharedInstance().setActive(true)
-
-        if let url = Bundle.main.url(forResource: "idle-welcome", withExtension: "mp3") {
-            player = try? AVAudioPlayer(contentsOf: url)
-            player?.prepareToPlay()
-        }
+    private func stopAll() {
+        typewriterTimer?.invalidate()
+        typewriterTimer = nil
+        checkTimer?.invalidate()
+        checkTimer = nil
+        audioPlayer?.stop()
+        audioPlayer = nil
     }
 
-    func play() {
-        player?.play()
-
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.updateText()
-        }
-    }
-
-    func stop() {
-        timer?.invalidate()
-        player?.stop()
-    }
-
-    private func updateText() {
-        guard let player = player else { return }
-
-        let currentTime = player.currentTime
-        var newText = ""
-
-        for sentence in sentences {
-            if currentTime >= sentence.time {
-                newText += sentence.text
-            }
-        }
-
-        if currentText != newText {
-            currentText = newText
-        }
-
-        if !player.isPlaying && currentTime > 0 {
-            timer?.invalidate()
-            isFinished = true
-        }
+    private func finishWelcome() {
+        stopAll()
+        hasSeenWelcome = true
+        onFinished()
     }
 }

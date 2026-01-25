@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Simple orbital visualization matching the web app
+/// Orbital visualization - always pulses, even when idle
 struct IdleOrbView: View {
     enum Mode {
         case idle, entering, active, completing, complete
@@ -11,6 +11,7 @@ struct IdleOrbView: View {
     var timeDisplay: String? = nil
     var size: CGFloat = 240
 
+    // Continuous animation state - always active
     @State private var rotation: Double = 0
     @State private var pulse: CGFloat = 1.0
 
@@ -57,7 +58,7 @@ struct IdleOrbView: View {
                 .frame(width: size * 0.38 * pulse, height: size * 0.38 * pulse)
                 .rotationEffect(.degrees(rotation * 0.5))
 
-            // Progress arc
+            // Progress arc (only during active/completing)
             if mode == .active || mode == .completing {
                 Circle()
                     .trim(from: 0, to: progress)
@@ -91,7 +92,6 @@ struct IdleOrbView: View {
             if let time = timeDisplay {
                 Text(time)
                     .font(.system(size: mode == .active ? 32 : 24, weight: .medium, design: .monospaced))
-                    .monospacedDigit()
                     .foregroundColor(.white.opacity(mode == .active ? 0.7 : 0.4))
             }
 
@@ -105,19 +105,29 @@ struct IdleOrbView: View {
         }
         .frame(width: size, height: size)
         .onAppear {
-            withAnimation(.linear(duration: 60).repeatForever(autoreverses: false)) {
-                rotation = 360
-            }
-            withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
-                pulse = 1.03
-            }
+            startContinuousAnimations()
+        }
+    }
+
+    private func startContinuousAnimations() {
+        // Continuous rotation - slow and subtle
+        withAnimation(.linear(duration: 60).repeatForever(autoreverses: false)) {
+            rotation = 360
+        }
+
+        // Continuous breathing pulse - always active, calm and subtle
+        // Duration: 4 seconds per cycle, scale: 1.0 -> 1.04
+        withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
+            pulse = 1.04
         }
     }
 }
 
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        IdleOrbView(mode: .active, progress: 0.35, timeDisplay: "5:42")
+struct IdleOrbView_Previews: PreviewProvider {
+    static var previews: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            IdleOrbView(mode: .idle)
+        }
     }
 }

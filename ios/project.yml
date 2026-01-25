@@ -40,3 +40,5 @@ targets:
           - audio
         UIRequiresFullScreen: true
         ITSAppUsesNonExemptEncryption: false
+        UIAppFonts:
+          - IBMPlexMono-Regular.ttf
