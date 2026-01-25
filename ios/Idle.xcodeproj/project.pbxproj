@@ -1,0 +1,424 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		105AFA5E9E9D53F3DD20A763 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A667B09477FF760D40028E4 /* HomeView.swift */; };
+		32EB365E77586C0FF0FF6435 /* StreakManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3565049C201B35C64CC098A0 /* StreakManager.swift */; };
+		348904D07F186B472287970C /* explanation.m4a in Resources */ = {isa = PBXBuildFile; fileRef = A84BC8C303E1D4D566E59D99 /* explanation.m4a */; };
+		4D8B4F08D9EB7B3F26404479 /* UserDefaults+Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F74E51F32D2F4C85E4942F /* UserDefaults+Onboarding.swift */; };
+		56FAC192B899BF6089CFCB51 /* MeditationAudioCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116F78AA6167C7C6C5628293 /* MeditationAudioCoordinator.swift */; };
+		5DD3698964AF4C449E48538F /* UserDefaults+Meditation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30150DEC52B72029D52069B /* UserDefaults+Meditation.swift */; };
+		613384DA8FBF9FDCE76280BC /* MeditationSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F023C1748DE6CEE5A034E4A /* MeditationSessionView.swift */; };
+		626020FBD87C15D21BE847BC /* idle-welcome.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A3F9F3543C04C8D4D6CEBF94 /* idle-welcome.mp3 */; };
+		6E8A15C84A69D8B9B406807B /* IdleOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6E43108C18FBF2D039A5AC0 /* IdleOrbView.swift */; };
+		6FA25DE45E1710C887DE03B5 /* TypedLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F585F2B1C3A7CB2E4C822F /* TypedLine.swift */; };
+		971C5961A8A8C68293881E47 /* WelcomeAudioViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C685F8E7076146DB0DFD94F /* WelcomeAudioViewModel.swift */; };
+		97E800F422B67F1A3654BC00 /* WelcomeLines.swift in Sources */ = {isa = PBXBuildFile; fileRef = B941F84DAEA3EF5BA787894C /* WelcomeLines.swift */; };
+		ABC90E6152F73C386E777DA5 /* finalaudioidle.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 58171D7B2EEDF6C3A89F69A8 /* finalaudioidle.mp3 */; };
+		B55B6FF7A647E7FAF5B82D48 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C17EFA566FA5608B983CABAA /* Assets.xcassets */; };
+		D373B96F434BF11156F15DF4 /* IdleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4577C5D53FBCA639900541A3 /* IdleApp.swift */; };
+		E4E7A36F2AFA44C71DC8350A /* WelcomeAudioOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42848DC93E85454FC4C719E2 /* WelcomeAudioOverlay.swift */; };
+		EAF49533A06FE78EFE097DBE /* SessionRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD43A1AEAFF4660D18BA508 /* SessionRootView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		116F78AA6167C7C6C5628293 /* MeditationAudioCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeditationAudioCoordinator.swift; sourceTree = "<group>"; };
+		17F585F2B1C3A7CB2E4C822F /* TypedLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedLine.swift; sourceTree = "<group>"; };
+		3565049C201B35C64CC098A0 /* StreakManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakManager.swift; sourceTree = "<group>"; };
+		3BD43A1AEAFF4660D18BA508 /* SessionRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRootView.swift; sourceTree = "<group>"; };
+		42848DC93E85454FC4C719E2 /* WelcomeAudioOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeAudioOverlay.swift; sourceTree = "<group>"; };
+		4577C5D53FBCA639900541A3 /* IdleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleApp.swift; sourceTree = "<group>"; };
+		4F023C1748DE6CEE5A034E4A /* MeditationSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeditationSessionView.swift; sourceTree = "<group>"; };
+		58171D7B2EEDF6C3A89F69A8 /* finalaudioidle.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = finalaudioidle.mp3; sourceTree = "<group>"; };
+		6A667B09477FF760D40028E4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		6C685F8E7076146DB0DFD94F /* WelcomeAudioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeAudioViewModel.swift; sourceTree = "<group>"; };
+		A3F9F3543C04C8D4D6CEBF94 /* idle-welcome.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "idle-welcome.mp3"; sourceTree = "<group>"; };
+		A6891DB735D2E4EE1EADF927 /* Idle.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Idle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A6E43108C18FBF2D039A5AC0 /* IdleOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdleOrbView.swift; sourceTree = "<group>"; };
+		A84BC8C303E1D4D566E59D99 /* explanation.m4a */ = {isa = PBXFileReference; path = explanation.m4a; sourceTree = "<group>"; };
+		ABB977ADFBF2D01335C50DB1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B941F84DAEA3EF5BA787894C /* WelcomeLines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeLines.swift; sourceTree = "<group>"; };
+		C17EFA566FA5608B983CABAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C30150DEC52B72029D52069B /* UserDefaults+Meditation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Meditation.swift"; sourceTree = "<group>"; };
+		F0F74E51F32D2F4C85E4942F /* UserDefaults+Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Onboarding.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		038654F6B129DFA79FA54E30 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A6891DB735D2E4EE1EADF927 /* Idle.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		060F6DFB8C46C69CDFECDAA0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6A667B09477FF760D40028E4 /* HomeView.swift */,
+				A6E43108C18FBF2D039A5AC0 /* IdleOrbView.swift */,
+				4F023C1748DE6CEE5A034E4A /* MeditationSessionView.swift */,
+				3BD43A1AEAFF4660D18BA508 /* SessionRootView.swift */,
+				42848DC93E85454FC4C719E2 /* WelcomeAudioOverlay.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		06BA4569B9E0F2B756981703 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				116F78AA6167C7C6C5628293 /* MeditationAudioCoordinator.swift */,
+				3565049C201B35C64CC098A0 /* StreakManager.swift */,
+				6C685F8E7076146DB0DFD94F /* WelcomeAudioViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		0FA15C9E1277418F40809FDE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				C30150DEC52B72029D52069B /* UserDefaults+Meditation.swift */,
+				F0F74E51F32D2F4C85E4942F /* UserDefaults+Onboarding.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		42C855D35E5BB5B78583F9EE /* Idle */ = {
+			isa = PBXGroup;
+			children = (
+				C17EFA566FA5608B983CABAA /* Assets.xcassets */,
+				4577C5D53FBCA639900541A3 /* IdleApp.swift */,
+				ABB977ADFBF2D01335C50DB1 /* Info.plist */,
+				0FA15C9E1277418F40809FDE /* Extensions */,
+				BE806DB8BE03908E207D8443 /* Models */,
+				7956EFD3938BBC9AB7873F9B /* Resources */,
+				06BA4569B9E0F2B756981703 /* ViewModels */,
+				060F6DFB8C46C69CDFECDAA0 /* Views */,
+			);
+			path = Idle;
+			sourceTree = "<group>";
+		};
+		7956EFD3938BBC9AB7873F9B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A84BC8C303E1D4D566E59D99 /* explanation.m4a */,
+				58171D7B2EEDF6C3A89F69A8 /* finalaudioidle.mp3 */,
+				A3F9F3543C04C8D4D6CEBF94 /* idle-welcome.mp3 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		870E214C20280982094415B5 = {
+			isa = PBXGroup;
+			children = (
+				42C855D35E5BB5B78583F9EE /* Idle */,
+				038654F6B129DFA79FA54E30 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BE806DB8BE03908E207D8443 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				17F585F2B1C3A7CB2E4C822F /* TypedLine.swift */,
+				B941F84DAEA3EF5BA787894C /* WelcomeLines.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		654E3DB250FCF4776930B84C /* Idle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 859BAEF1D665053EB5000BDB /* Build configuration list for PBXNativeTarget "Idle" */;
+			buildPhases = (
+				EC0C91B7CF53373156D41030 /* Sources */,
+				4D9006F4DAD27617E22751EB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Idle;
+			packageProductDependencies = (
+			);
+			productName = Idle;
+			productReference = A6891DB735D2E4EE1EADF927 /* Idle.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E899A03646A6CE645A0D5E42 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					654E3DB250FCF4776930B84C = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = F182FA9FCA919C6BFBA70DC4 /* Build configuration list for PBXProject "Idle" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 870E214C20280982094415B5;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				654E3DB250FCF4776930B84C /* Idle */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4D9006F4DAD27617E22751EB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B55B6FF7A647E7FAF5B82D48 /* Assets.xcassets in Resources */,
+				348904D07F186B472287970C /* explanation.m4a in Resources */,
+				ABC90E6152F73C386E777DA5 /* finalaudioidle.mp3 in Resources */,
+				626020FBD87C15D21BE847BC /* idle-welcome.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EC0C91B7CF53373156D41030 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				105AFA5E9E9D53F3DD20A763 /* HomeView.swift in Sources */,
+				D373B96F434BF11156F15DF4 /* IdleApp.swift in Sources */,
+				6E8A15C84A69D8B9B406807B /* IdleOrbView.swift in Sources */,
+				56FAC192B899BF6089CFCB51 /* MeditationAudioCoordinator.swift in Sources */,
+				613384DA8FBF9FDCE76280BC /* MeditationSessionView.swift in Sources */,
+				EAF49533A06FE78EFE097DBE /* SessionRootView.swift in Sources */,
+				32EB365E77586C0FF0FF6435 /* StreakManager.swift in Sources */,
+				6FA25DE45E1710C887DE03B5 /* TypedLine.swift in Sources */,
+				5DD3698964AF4C449E48538F /* UserDefaults+Meditation.swift in Sources */,
+				4D8B4F08D9EB7B3F26404479 /* UserDefaults+Onboarding.swift in Sources */,
+				E4E7A36F2AFA44C71DC8350A /* WelcomeAudioOverlay.swift in Sources */,
+				971C5961A8A8C68293881E47 /* WelcomeAudioViewModel.swift in Sources */,
+				97E800F422B67F1A3654BC00 /* WelcomeLines.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4A677508D26360E0FB37AECD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Idle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Idle;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.idle.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B6D0D210ACFF101FCFD5B8C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Idle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Idle;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.idle.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C689D11E7860376792FDA1FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FA4F7ED7841A2D0899051BCE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		859BAEF1D665053EB5000BDB /* Build configuration list for PBXNativeTarget "Idle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A677508D26360E0FB37AECD /* Debug */,
+				B6D0D210ACFF101FCFD5B8C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F182FA9FCA919C6BFBA70DC4 /* Build configuration list for PBXProject "Idle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C689D11E7860376792FDA1FB /* Debug */,
+				FA4F7ED7841A2D0899051BCE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E899A03646A6CE645A0D5E42 /* Project object */;
+}
