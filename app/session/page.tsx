@@ -1,13 +1,10 @@
 'use client';
 
 /**
- * INVARIANTS — Do not violate:
- * 1. Session tab is always reachable via TabBar
- * 2. Only ONE session type exists — no library, no picker
- * 3. Duration is fixed at 7 minutes — no customization
- * 4. Navigates to /session/run for actual playback
- * 5. Copy must be calm + factual
- * See PRODUCT_GUARDRAILS.md for full documentation.
+ * SESSION SCREEN — Single session
+ *
+ * FONT: Arimo only
+ * MOOD: Deep space with distant cosmic glow
  */
 
 import { useRouter } from 'next/navigation';
@@ -16,69 +13,39 @@ export default function SessionPage() {
   const router = useRouter();
 
   return (
-    <div className="page flex flex-col pb-20">
-      {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen px-5 pt-16 pb-8">
-        {/* Glass panel floating above forest */}
-        <div className="page-glass">
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1
-              className="text-[10px] uppercase tracking-widest mb-3"
-              style={{ color: 'var(--text-tertiary)', letterSpacing: '0.15em' }}
-            >
-              Session
-            </h1>
-            <p
-              className="text-lg font-light"
-              style={{ color: 'var(--text)' }}
-            >
-              7 minutes
-            </p>
-          </div>
+    <div className="page px-8 pb-24 grain">
+      <div className="atmosphere" />
 
-          {/* Single session button */}
-          <button
-            onClick={() => router.push('/session/run')}
-            className="session-card w-full text-left p-5"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className="text-base font-light"
-                  style={{ color: 'var(--text)', opacity: 0.85 }}
-                >
-                  Begin
-                </p>
-                <p
-                  className="text-[10px] uppercase tracking-[0.15em] mt-1"
-                  style={{ color: 'var(--muted)', opacity: 0.5 }}
-                >
-                  Daily reset
-                </p>
-              </div>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                style={{ color: 'var(--muted)', opacity: 0.35 }}
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </div>
-          </button>
+      {/* Top anchor */}
+      <div className="pt-20 relative z-10">
+        <p className="text-meta">Session</p>
+      </div>
 
-          {/* Hint */}
-          <p
-            className="text-center text-xs mt-6"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            Audio guided · One session per day
-          </p>
-        </div>
+      {/* Middle — Duration display with generous spacing */}
+      <div className="flex-1 flex flex-col justify-center relative z-10">
+        <p
+          className="text-number mb-3"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          7:00
+        </p>
+
+        <p
+          className="text-body"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          Audio-guided meditation
+        </p>
+      </div>
+
+      {/* Bottom — more breathing room */}
+      <div className="pb-8 relative z-10">
+        <button
+          onClick={() => router.push('/session/run')}
+          className="btn-primary w-full"
+        >
+          Begin
+        </button>
       </div>
     </div>
   );

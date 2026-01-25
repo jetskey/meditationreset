@@ -1,14 +1,28 @@
 /**
  * ROOT LAYOUT
- * - Arimo font only
- * - Dark planetary theme
+ *
+ * Typography: Arimo
+ * MOOD: Deep space, cosmic atmosphere, distant warmth
  */
 
 import type { Metadata, Viewport } from 'next';
+import { Arimo, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { TabBar } from '@/components/TabBar';
 import { Providers } from '@/components/Providers';
-import WelcomeAudioOverlay from '@/components/WelcomeAudioOverlay';
+import { CosmicBackground } from '@/components/CosmicBackground';
+
+const arimo = Arimo({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-arimo',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-ibm-plex-mono',
+});
 
 export const metadata: Metadata = {
   title: 'Idle - Daily Reset',
@@ -25,7 +39,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0F0E0D',
+  themeColor: '#060608',
   viewportFit: 'cover',
 };
 
@@ -35,12 +49,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${arimo.variable} ${ibmPlexMono.variable}`}>
       <body>
-        {/* Solid background */}
-        <div id="app-background" />
-
-        <WelcomeAudioOverlay />
+        <CosmicBackground />
 
         <Providers>
           <main className="app-shell">

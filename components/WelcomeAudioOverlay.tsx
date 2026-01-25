@@ -92,7 +92,7 @@ export default function WelcomeAudioOverlay() {
   return (
     <div style={overlay}>
       <div style={panel}>
-        <h2 style={title}>welcome to idle</h2>
+        <h2 style={title}>Welcome to Idle</h2>
 
         <div style={subtitleBox}>
           <p style={subtitle}>{caption}</p>
@@ -110,7 +110,7 @@ export default function WelcomeAudioOverlay() {
   );
 }
 
-/* styles */
+/* styles — minimal, warm neutral */
 
 const overlay: React.CSSProperties = {
   position: "fixed",
@@ -119,56 +119,66 @@ const overlay: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0,0,0,0.55)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  background: "rgba(10,11,14,0.92)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
   fontFamily: "var(--font-inter)",
   pointerEvents: "auto",
 };
 
 const panel: React.CSSProperties = {
-  width: "min(520px, 92vw)",
-  padding: 28,
-  borderRadius: 26,
-  background: "rgba(255,255,255,0.10)",
-  border: "1px solid rgba(255,255,255,0.18)",
-  backdropFilter: "blur(22px)",
-  WebkitBackdropFilter: "blur(22px)",
+  width: "min(440px, 88vw)",
+  padding: 32,
+  borderRadius: 12,
+  background: "rgba(255,255,255,0.02)",
+  border: "1px solid rgba(255,255,255,0.04)",
   textAlign: "center",
-  color: "rgba(255,255,255,0.95)",
+  color: "#E6E8EB",
   pointerEvents: "auto",
 };
 
 const title: React.CSSProperties = {
+  fontFamily: "var(--font-acme)",
   fontSize: 22,
-  marginBottom: 16,
+  letterSpacing: "0.03em",
+  marginBottom: 24,
+  opacity: 0.9,
 };
 
 const subtitleBox: React.CSSProperties = {
-  padding: 18,
-  borderRadius: 18,
+  padding: 20,
+  borderRadius: 8,
   background: "rgba(0,0,0,0.25)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  marginBottom: 18,
+  border: "1px solid rgba(255,255,255,0.03)",
+  marginBottom: 24,
+  minHeight: 72,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 const subtitle: React.CSSProperties = {
-  fontSize: 15,
-  lineHeight: 1.5,
+  fontSize: 13,
+  lineHeight: 1.65,
+  fontWeight: 300,
+  opacity: 0.75,
 };
 
 const errorText: React.CSSProperties = {
-  marginTop: 10,
-  fontSize: 12,
-  opacity: 0.8,
+  marginTop: 12,
+  fontSize: 11,
+  opacity: 0.5,
 };
 
 const button: React.CSSProperties = {
-  padding: "12px 26px",
-  borderRadius: 999,
-  background: "rgba(255,255,255,0.18)",
-  border: "1px solid rgba(255,255,255,0.28)",
-  color: "white",
-  fontSize: 14,
+  padding: "12px 28px",
+  borderRadius: 8,
+  background: "rgba(255,255,255,0.025)",
+  border: "1px solid rgba(255,255,255,0.05)",
+  color: "#E6E8EB",
+  fontSize: 12,
+  fontWeight: 500,
+  letterSpacing: "0.06em",
   cursor: "pointer",
+  transition: "all 300ms cubic-bezier(0.4, 0, 0.6, 1)",
 };

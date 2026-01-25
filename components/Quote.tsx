@@ -42,8 +42,8 @@ export function Quote({ quotes, className = '', style }: QuoteProps) {
       style={{
         ...style,
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(4px)',
-        transition: 'opacity 400ms ease-out, transform 400ms ease-out',
+        transform: visible ? 'scale(1)' : 'scale(0.98)',
+        transition: 'opacity 800ms cubic-bezier(0.4, 0, 0.6, 1), transform 800ms cubic-bezier(0.4, 0, 0.6, 1)',
       }}
     >
       {quote}

@@ -3,127 +3,63 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * IDLE ORB — State-Aware Animated Element
+ * IDLE ORB — Structural Geometry, Not Decoration
  *
- * Animation behavior by state:
- *
- * IDLE (ready):
- * - Very slow, ambient motion
- * - Loose orbits with significant drift
- * - Slow, deep breathing
- * - Communicates: "ready, waiting"
- *
- * ACTIVE (session in progress):
- * - Motion becomes coherent, synchronized
- * - Tighter orbits, less drift
- * - Faster, rhythmic breathing (like a heartbeat)
- * - Particles brighter, more present
- * - Communicates: "process in progress"
- *
- * COMPLETING (session ending):
- * - Particles slow and converge toward center
- * - Glow intensifies then fades
- * - Drift reduces to near-zero
- * - Communicates: "resolution, closure"
- *
- * COMPLETE (finished):
- * - Particles gathered at center
- * - Gentle pulse, then stillness
- * - Communicates: "done"
- *
- * All transitions are interpolated smoothly over ~1s.
+ * Orbital rings, radial alignment, distance hierarchy
+ * Feels like: instrument dial, radar sweep, aperture mechanism
  */
 
 type OrbMode = 'idle' | 'entering' | 'active' | 'completing' | 'complete';
 
 type IdleOrbProps = {
   mode?: OrbMode;
-  progress?: number; // 0-1 for active mode
-  timeDisplay?: string; // e.g. "5:32" for active mode
-  size?: number; // px, default 280
-  paused?: boolean; // Pause tectonic animation
+  progress?: number;
+  timeDisplay?: string;
+  size?: number;
 };
 
-// Animation parameters per state
 type AnimationParams = {
-  orbitSpeed: number;       // Base orbit speed multiplier
-  driftAmplitude: number;   // How much particles drift in/out
-  driftSpeed: number;       // How fast drift oscillates
-  breatheSpeed: number;     // Core breathing rate
-  breatheDepth: number;     // How much the core expands/contracts
-  particleOpacity: number;  // Particle visibility
-  convergence: number;      // 0 = normal orbit, 1 = all at center
-  coreGlow: number;         // Core glow intensity
-  coherence: number;        // 0 = loose/random, 1 = synchronized
+  ringOpacity: number;
+  coreGlow: number;
+  rotationSpeed: number;
+  pulseDepth: number;
 };
 
 const STATE_PARAMS: Record<OrbMode, AnimationParams> = {
   idle: {
-    orbitSpeed: 0.3,
-    driftAmplitude: 12,
-    driftSpeed: 0.8,
-    breatheSpeed: 0.6,
-    breatheDepth: 0.2,
-    particleOpacity: 0.245,  // Reduced 30%
-    convergence: 0,
-    coreGlow: 0.8,
-    coherence: 0,
+    ringOpacity: 0.12,
+    coreGlow: 0.7,
+    rotationSpeed: 0.012,
+    pulseDepth: 0.06,
   },
   entering: {
-    // Brief intensification - "crossing the threshold"
-    orbitSpeed: 0.5,
-    driftAmplitude: 6,
-    driftSpeed: 1.0,
-    breatheSpeed: 1.0,
-    breatheDepth: 0.25,
-    particleOpacity: 0.42,  // Reduced 30%
-    convergence: 0.15,
-    coreGlow: 1.4,
-    coherence: 0.4,
+    ringOpacity: 0.18,
+    coreGlow: 1.0,
+    rotationSpeed: 0.025,
+    pulseDepth: 0.08,
   },
   active: {
-    orbitSpeed: 1.0,
-    driftAmplitude: 4,
-    driftSpeed: 1.2,
-    breatheSpeed: 1.5,
-    breatheDepth: 0.12,
-    particleOpacity: 0.385,  // Reduced 30%
-    convergence: 0,
-    coreGlow: 1.0,
-    coherence: 0.6,
+    ringOpacity: 0.15,
+    coreGlow: 0.85,
+    rotationSpeed: 0.018,
+    pulseDepth: 0.05,
   },
   completing: {
-    orbitSpeed: 0.15,
-    driftAmplitude: 2,
-    driftSpeed: 0.3,
-    breatheSpeed: 0.4,
-    breatheDepth: 0.25,
-    particleOpacity: 0.49,  // Reduced 30%
-    convergence: 0.7,
-    coreGlow: 1.3,
-    coherence: 0.9,
+    ringOpacity: 0.20,
+    coreGlow: 1.0,
+    rotationSpeed: 0.008,
+    pulseDepth: 0.07,
   },
   complete: {
-    orbitSpeed: 0.05,
-    driftAmplitude: 1,
-    driftSpeed: 0.2,
-    breatheSpeed: 0.3,
-    breatheDepth: 0.1,
-    particleOpacity: 0.28,  // Reduced 30%
-    convergence: 0.85,
-    coreGlow: 0.9,
-    coherence: 1.0,
+    ringOpacity: 0.08,
+    coreGlow: 0.5,
+    rotationSpeed: 0.004,
+    pulseDepth: 0.02,
   },
 };
 
-// Smooth interpolation helper
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
-}
-
-// Ease-out cubic for smooth transitions
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
 }
 
 export function IdleOrb({
@@ -131,22 +67,18 @@ export function IdleOrb({
   progress = 0,
   timeDisplay,
   size = 280,
-  paused = false,
 }: IdleOrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
-  const particlesRef = useRef<Particle[]>([]);
-
-  // Current interpolated animation params (for smooth transitions)
   const currentParamsRef = useRef<AnimationParams>({ ...STATE_PARAMS.idle });
   const targetModeRef = useRef<OrbMode>(mode);
-  const transitionProgressRef = useRef(1); // 1 = fully transitioned
+  const transitionRef = useRef(1);
+  const rotationRef = useRef(0);
 
-  // Update target when mode changes
   useEffect(() => {
     if (mode !== targetModeRef.current) {
       targetModeRef.current = mode;
-      transitionProgressRef.current = 0; // Start new transition
+      transitionRef.current = 0;
     }
   }, [mode]);
 
@@ -157,292 +89,195 @@ export function IdleOrb({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // High DPI support
     const dpr = window.devicePixelRatio || 1;
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     ctx.scale(dpr, dpr);
 
-    // Initialize particles with individual properties
-    const particleCount = 28;
-    particlesRef.current = Array.from({ length: particleCount }, (_, i) => ({
-      // Position
-      angle: (i / particleCount) * Math.PI * 2,
-      baseRadius: 55 + Math.random() * 55,
-
-      // Individual variation (makes motion feel organic)
-      speedVariation: 0.7 + Math.random() * 0.6,
-      sizeBase: 1 + Math.random() * 1.5,
-      opacityBase: 0.6 + Math.random() * 0.4,
-
-      // Drift state
-      driftPhase: Math.random() * Math.PI * 2,
-      driftVariation: 0.5 + Math.random() * 1.0,
-
-      // For coherence effect (synchronized motion)
-      coherenceOffset: Math.random() * Math.PI * 2,
-    }));
-
-    let time = 0;
     let lastTime = performance.now();
 
     const animate = (currentTime: number) => {
-      const deltaTime = currentTime - lastTime;
+      const dt = currentTime - lastTime;
       lastTime = currentTime;
-      time += deltaTime;
 
-      // ─────────────────────────────────────────────────────────────
-      // INTERPOLATE ANIMATION PARAMETERS
-      // Smooth transition between states over ~800ms
-      // ─────────────────────────────────────────────────────────────
-      if (transitionProgressRef.current < 1) {
-        transitionProgressRef.current = Math.min(1, transitionProgressRef.current + deltaTime / 800);
-        const t = easeOutCubic(transitionProgressRef.current);
+      // Interpolate parameters
+      if (transitionRef.current < 1) {
+        transitionRef.current = Math.min(1, transitionRef.current + dt / 1000);
+        const t = transitionRef.current;
         const target = STATE_PARAMS[targetModeRef.current];
-        const current = currentParamsRef.current;
-
-        current.orbitSpeed = lerp(current.orbitSpeed, target.orbitSpeed, t);
-        current.driftAmplitude = lerp(current.driftAmplitude, target.driftAmplitude, t);
-        current.driftSpeed = lerp(current.driftSpeed, target.driftSpeed, t);
-        current.breatheSpeed = lerp(current.breatheSpeed, target.breatheSpeed, t);
-        current.breatheDepth = lerp(current.breatheDepth, target.breatheDepth, t);
-        current.particleOpacity = lerp(current.particleOpacity, target.particleOpacity, t);
-        current.convergence = lerp(current.convergence, target.convergence, t);
-        current.coreGlow = lerp(current.coreGlow, target.coreGlow, t);
-        current.coherence = lerp(current.coherence, target.coherence, t);
+        const cur = currentParamsRef.current;
+        cur.ringOpacity = lerp(cur.ringOpacity, target.ringOpacity, t);
+        cur.coreGlow = lerp(cur.coreGlow, target.coreGlow, t);
+        cur.rotationSpeed = lerp(cur.rotationSpeed, target.rotationSpeed, t);
+        cur.pulseDepth = lerp(cur.pulseDepth, target.pulseDepth, t);
       }
 
-      const params = currentParamsRef.current;
+      const p = currentParamsRef.current;
+      rotationRef.current += p.rotationSpeed * dt * 0.001;
 
       ctx.clearRect(0, 0, size, size);
-
       const cx = size / 2;
       const cy = size / 2;
 
-      // ─────────────────────────────────────────────────────────────
-      // CORE BREATHING
-      // Idle: slow, deep breaths
-      // Active: faster, rhythmic (heartbeat-like)
-      // ─────────────────────────────────────────────────────────────
-      const breathePhase = time * 0.001 * params.breatheSpeed;
-      const breathe = 1 + Math.sin(breathePhase) * params.breatheDepth;
+      // Subtle pulse
+      const pulse = 1 + Math.sin(currentTime * 0.001) * p.pulseDepth;
 
-      // Secondary breath for more organic feel (only in idle)
-      const secondaryBreathe = 1 + Math.sin(breathePhase * 0.7 + 1) * params.breatheDepth * 0.3 * (1 - params.coherence);
+      // ═══════════════════════════════════════════════════════════════
+      // STRUCTURAL RINGS — Orbital alignment, not decoration
+      // ═══════════════════════════════════════════════════════════════
 
-      const coreRadius = 10 * breathe * secondaryBreathe;
+      const rings = [
+        { radius: 95 * pulse, segments: 60, gap: 0.15 },
+        { radius: 70 * pulse, segments: 40, gap: 0.2 },
+        { radius: 45 * pulse, segments: 24, gap: 0.25 },
+      ];
 
-      // ─────────────────────────────────────────────────────────────
-      // CORE GLOW LAYERS
-      // ─────────────────────────────────────────────────────────────
-      const glowIntensity = params.coreGlow * breathe;
+      ctx.lineCap = 'round';
 
-      for (let i = 5; i >= 0; i--) {
-        const glowRadius = coreRadius + i * 12 * breathe;
-        const alpha = (0.12 - i * 0.018) * glowIntensity;
+      rings.forEach((ring, ringIndex) => {
+        const segmentAngle = (Math.PI * 2) / ring.segments;
+        const gapAngle = segmentAngle * ring.gap;
+        const drawAngle = segmentAngle - gapAngle;
+        const rotation = rotationRef.current * (ringIndex % 2 === 0 ? 1 : -0.7);
 
-        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
-        gradient.addColorStop(0, `rgba(157, 170, 149, ${alpha})`);
-        gradient.addColorStop(0.6, `rgba(157, 170, 149, ${alpha * 0.4})`);
-        gradient.addColorStop(1, 'rgba(157, 170, 149, 0)');
+        ctx.strokeStyle = `rgba(180, 165, 140, ${p.ringOpacity * (1 - ringIndex * 0.2)})`;
+        ctx.lineWidth = 1;
 
-        ctx.fillStyle = gradient;
+        for (let i = 0; i < ring.segments; i++) {
+          const startAngle = rotation + i * segmentAngle;
+          const endAngle = startAngle + drawAngle;
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, ring.radius, startAngle, endAngle);
+          ctx.stroke();
+        }
+      });
+
+      // ═══════════════════════════════════════════════════════════════
+      // CARDINAL MARKERS — Alignment reference points
+      // ═══════════════════════════════════════════════════════════════
+
+      const markerRadius = 105 * pulse;
+      const markers = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+
+      ctx.fillStyle = `rgba(200, 180, 150, ${p.ringOpacity * 1.5})`;
+      markers.forEach(angle => {
+        const x = cx + Math.cos(angle + rotationRef.current * 0.3) * markerRadius;
+        const y = cy + Math.sin(angle + rotationRef.current * 0.3) * markerRadius;
         ctx.beginPath();
-        ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
         ctx.fill();
-      }
+      });
 
-      // Core orb
+      // ═══════════════════════════════════════════════════════════════
+      // CORE — Warm aperture, not glowing orb
+      // ═══════════════════════════════════════════════════════════════
+
+      const coreRadius = 12 * pulse;
+
+      // Soft glow field
+      const glowGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius * 4);
+      glowGradient.addColorStop(0, `rgba(180, 160, 130, ${0.04 * p.coreGlow})`);
+      glowGradient.addColorStop(0.5, `rgba(160, 145, 120, ${0.02 * p.coreGlow})`);
+      glowGradient.addColorStop(1, 'rgba(140, 130, 110, 0)');
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreRadius * 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core aperture
       const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius);
-      coreGradient.addColorStop(0, `rgba(235, 245, 230, ${0.95 * glowIntensity})`);
-      coreGradient.addColorStop(0.4, `rgba(200, 215, 195, ${0.8 * glowIntensity})`);
-      coreGradient.addColorStop(1, `rgba(157, 170, 149, ${0.5 * glowIntensity})`);
+      coreGradient.addColorStop(0, `rgba(230, 225, 215, ${0.9 * p.coreGlow})`);
+      coreGradient.addColorStop(0.6, `rgba(200, 185, 165, ${0.5 * p.coreGlow})`);
+      coreGradient.addColorStop(1, `rgba(160, 150, 135, ${0.2 * p.coreGlow})`);
       ctx.fillStyle = coreGradient;
       ctx.beginPath();
       ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // ─────────────────────────────────────────────────────────────
-      // ORBITING PARTICLES
-      // Idle: loose, wandering orbits
-      // Active: tighter, synchronized
-      // Completing: converging toward center
-      // ─────────────────────────────────────────────────────────────
-
-      // Global coherence phase (all particles sync to this in active mode)
-      const coherencePhase = time * 0.002;
-
-      particlesRef.current.forEach((p, i) => {
-        // Update angle (orbit)
-        const individualSpeed = p.speedVariation * params.orbitSpeed * 0.0008;
-        p.angle += individualSpeed * deltaTime;
-
-        // Drift: how much the particle moves in/out
-        p.driftPhase += params.driftSpeed * 0.0015 * p.driftVariation * deltaTime;
-
-        // Blend between individual drift and coherent drift
-        const individualDrift = Math.sin(p.driftPhase) * params.driftAmplitude * p.driftVariation;
-        const coherentDrift = Math.sin(coherencePhase + p.coherenceOffset * 0.3) * params.driftAmplitude * 0.5;
-        const drift = lerp(individualDrift, coherentDrift, params.coherence);
-
-        // Calculate radius with convergence
-        const normalRadius = p.baseRadius + drift;
-        const convergedRadius = 20 + drift * 0.3; // All particles near center
-        const currentRadius = lerp(normalRadius, convergedRadius, params.convergence);
-
-        // Position
-        const x = cx + Math.cos(p.angle) * currentRadius;
-        const y = cy + Math.sin(p.angle) * currentRadius;
-
-        // Size pulses with coherence in active mode
-        const sizePulse = 1 + Math.sin(coherencePhase * 2 + i * 0.2) * 0.15 * params.coherence;
-        const particleSize = p.sizeBase * sizePulse;
-
-        // Opacity
-        const baseOpacity = p.opacityBase * params.particleOpacity;
-        const opacityPulse = 1 + Math.sin(coherencePhase + i * 0.1) * 0.2 * params.coherence;
-        const opacity = baseOpacity * opacityPulse * breathe;
-
-        // Particle glow
-        const glowSize = particleSize * (3 + params.coherence);
-        const particleGlow = ctx.createRadialGradient(x, y, 0, x, y, glowSize);
-        particleGlow.addColorStop(0, `rgba(200, 220, 195, ${opacity * 0.8})`);
-        particleGlow.addColorStop(0.5, `rgba(180, 200, 175, ${opacity * 0.3})`);
-        particleGlow.addColorStop(1, 'rgba(180, 200, 175, 0)');
-        ctx.fillStyle = particleGlow;
-        ctx.beginPath();
-        ctx.arc(x, y, glowSize, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Particle core
-        ctx.fillStyle = `rgba(240, 250, 235, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(x, y, particleSize, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
       animationRef.current = requestAnimationFrame(animate);
     };
 
     animationRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationRef.current);
+  }, [size]);
 
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [size]); // Note: mode changes are handled via refs, not dependency
-
-  const ringRadius = size / 2 - 20;
+  const ringRadius = size / 2 - 18;
   const circumference = 2 * Math.PI * ringRadius;
 
-  // Tectonic pulse only during active session, stops when paused
-  const pulseClass = mode === 'active'
-    ? `tectonic-pulse${paused ? ' paused' : ''}`
-    : '';
-
   return (
-    <div
-      className={`relative ${pulseClass}`}
-      style={{ width: size, height: size }}
-    >
-      {/* Canvas for particle system - softened edges */}
+    <div className="relative" style={{ width: size, height: size }}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
-        style={{ width: size, height: size, filter: 'blur(1.5px)' }}
+        style={{ width: size, height: size }}
       />
 
-      {/* Progress ring (active mode only) */}
+      {/* Progress arc — structural, not decorative */}
       {(mode === 'active' || mode === 'completing') && (
         <svg
           className="absolute inset-0"
           viewBox={`0 0 ${size} ${size}`}
           style={{ transform: 'rotate(-90deg)' }}
         >
-          {/* Track */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={ringRadius}
             fill="none"
-            stroke="rgba(58, 52, 48, 0.3)"
-            strokeWidth="2"
+            stroke="rgba(180, 165, 140, 0.04)"
+            strokeWidth="1"
           />
-          {/* Progress */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={ringRadius}
             fill="none"
-            stroke="rgba(168, 162, 155, 0.35)"
-            strokeWidth="2"
+            stroke="rgba(200, 180, 150, 0.35)"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={(1 - progress) * circumference}
-            style={{ transition: 'stroke-dashoffset 0.3s ease-out' }}
+            style={{ transition: 'stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.6, 1)' }}
           />
         </svg>
       )}
 
-      {/* Time display (active mode only) */}
+      {/* Time — dimmer than body text */}
       {mode === 'active' && timeDisplay && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ animation: 'fadeIn 300ms ease-out' }}
-        >
+        <div className="absolute inset-0 flex items-center justify-center">
           <span
-            className="text-4xl font-light tabular-nums"
-            style={{ color: 'var(--text)', opacity: 0.9 }}
+            className="font-mono text-3xl tabular-nums"
+            style={{ color: 'rgba(230, 232, 235, 0.7)' }}
           >
             {timeDisplay}
           </span>
         </div>
       )}
 
-      {/* Completing state - shows time fading */}
       {mode === 'completing' && timeDisplay && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{
-            animation: 'fadeIn 300ms ease-out',
-            opacity: 0.6,
-          }}
-        >
+        <div className="absolute inset-0 flex items-center justify-center">
           <span
-            className="text-3xl font-light tabular-nums"
-            style={{ color: 'var(--text)' }}
+            className="font-mono text-2xl tabular-nums"
+            style={{ color: 'rgba(230, 232, 235, 0.4)' }}
           >
             {timeDisplay}
           </span>
         </div>
       )}
 
-      {/* Complete state */}
       {mode === 'complete' && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ animation: 'fadeIn 600ms ease-out' }}
-        >
+        <div className="absolute inset-0 flex items-center justify-center">
           <span
-            className="text-2xl font-light"
-            style={{ color: 'var(--text)', opacity: 0.85 }}
+            className="text-sm tracking-widest uppercase"
+            style={{ color: 'rgba(230, 232, 235, 0.5)', letterSpacing: '0.2em' }}
           >
-            Complete
+            Done
           </span>
         </div>
       )}
     </div>
   );
 }
-
-type Particle = {
-  angle: number;
-  baseRadius: number;
-  speedVariation: number;
-  sizeBase: number;
-  opacityBase: number;
-  driftPhase: number;
-  driftVariation: number;
-  coherenceOffset: number;
-};
 
 export default IdleOrb;

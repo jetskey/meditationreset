@@ -1,33 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   IDLE — Refined Cosmic Atmosphere
+
+   MOOD: Space, orbit, depth, silence, restraint, precision
+   PALETTE: Deep space dark with warm distant glow
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  /* BACKGROUND GRADIENT */
-  --bg-top: #0F0E0D;
-  --bg-bottom: #2A211B;
+  /* ─────────────────────────────────────────────────────────────
+     BASE — Pure black space
+     ───────────────────────────────────────────────────────────── */
+  --bg: #000000;
+  --bg-elevated: #050509;
 
-  /* SURFACE */
-  --surface: rgba(26, 24, 22, 0.7);
-
-  /* TEXT */
-  --text-primary: #E8E4DF;
-  --text-secondary: #A8A29B;
-  --text-muted: #6F6A64;
-
-  /* BORDER */
-  --border: rgba(111, 106, 100, 0.2);
-
-  /* Legacy aliases */
-  --bg0: #0F0E0D;
-  --bg1: #2A211B;
-  --text: #E8E4DF;
-  --text-tertiary: #A8A29B;
-  --muted: #6F6A64;
-  --accent: #A8A29B;
-  --divider: rgba(111, 106, 100, 0.2);
+  /* TEXT — Soft white */
+  --text-primary: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.60);
+  --text-muted: rgba(255, 255, 255, 0.35);
 }
 
 * {
@@ -43,86 +35,72 @@ html, body {
 }
 
 body {
-  background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+  background: #000000;
   color: var(--text-primary);
+  font-family: var(--font-arimo), system-ui, sans-serif;
   line-height: 1.5;
-  font-family: 'Arimo', sans-serif;
-  min-height: 100vh;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SAFE AREA UTILITIES
+   TYPOGRAPHY — Quiet and intentional
    ═══════════════════════════════════════════════════════════════ */
 
-.safe-top { padding-top: env(safe-area-inset-top, 0px); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
-.safe-left { padding-left: env(safe-area-inset-left, 0px); }
-.safe-right { padding-right: env(safe-area-inset-right, 0px); }
+.text-headline {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
 
-.safe-inset {
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+.text-body {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+.text-meta {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.text-number {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 48px;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-timer {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 44px;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-typewriter {
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ANIMATIONS
+   BACKGROUND — Handled by CosmicBackground component
+   No atmosphere, no grain. Pure near-black.
    ═══════════════════════════════════════════════════════════════ */
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes homeBreathing {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-.home-breathing {
-  animation: homeBreathing 6s ease-in-out infinite;
-}
-
-@keyframes sessionStartPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
-}
-
-.session-start-pulse {
-  animation: sessionStartPulse 600ms ease-in-out;
-}
-
-@keyframes pageEntrance {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.page-entrance {
-  animation: pageEntrance 200ms ease-out;
-}
-
-.button-press {
-  transition: transform 150ms ease-out, opacity 150ms ease-out;
-}
-
-.button-press:active {
-  transform: scale(0.97);
-  opacity: 0.9;
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   APP SHELL
-   ═══════════════════════════════════════════════════════════════ */
-
-.app-shell {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   PAGE BASE
+   LAYOUT — Generous negative space
    ═══════════════════════════════════════════════════════════════ */
 
 .page {
@@ -130,191 +108,76 @@ body {
   min-height: 100dvh;
   width: 100%;
   position: relative;
-  overflow: hidden;
-  background: transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GLOBAL BACKGROUND — Dark planetary atmosphere
+   BACKGROUND — Handled by CosmicBackground component
    ═══════════════════════════════════════════════════════════════ */
 
-#app-background {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background: linear-gradient(to bottom, #0F0E0D, #2A211B);
-}
-
-/* Radial darkening toward edges */
-#app-background::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  pointer-events: none;
-}
-
-/* Subtle grain texture */
-#app-background::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 /* ═══════════════════════════════════════════════════════════════
-   LANDING VEIL — Removed (not needed)
-   ═══════════════════════════════════════════════════════════════ */
-
-.landing-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: transparent;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   GLASS MATERIAL — Dark only
-   ═══════════════════════════════════════════════════════════════ */
-
-.glass {
-  background: rgba(26, 24, 22, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(111, 106, 100, 0.2);
-  border-radius: 16px;
-}
-
-.glass-card {
-  background: rgba(26, 24, 22, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(111, 106, 100, 0.2);
-  border-radius: 16px;
-}
-
-.glass-button {
-  background: rgba(26, 24, 22, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(111, 106, 100, 0.25);
-  border-radius: 16px;
-  transition: background 150ms ease-out;
-}
-
-.glass-button:hover,
-.glass-button:active {
-  background: rgba(26, 24, 22, 0.8);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   BOTTOM NAVIGATION — Dark glass
+   NAVIGATION — Barely visible
    ═══════════════════════════════════════════════════════════════ */
 
 .bottom-nav {
-  background: rgba(26, 24, 22, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(111, 106, 100, 0.15);
-  border-radius: 0;
+  background: rgba(6, 6, 8, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE GLASS — Dark floating panel
+   BUTTONS — Solid but unobtrusive
    ═══════════════════════════════════════════════════════════════ */
 
-.page-glass {
-  background: rgba(26, 24, 22, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(111, 106, 100, 0.2);
-  border-radius: 16px;
-  padding: 28px 24px;
-  max-width: 720px;
-  margin: 0 auto;
+.btn-primary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 16px 32px;
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.1px;
+  color: var(--text-primary);
+  transition: background 200ms ease;
+}
+
+.btn-primary:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.btn-primary:active {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.btn-skip {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-family: var(--font-arimo), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: color 200ms ease;
+}
+
+.btn-skip:hover {
+  color: var(--text-secondary);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SESSION CARD — Dark embedded
+   SAFE AREAS
    ═══════════════════════════════════════════════════════════════ */
 
-.session-card {
-  background: rgba(26, 24, 22, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(111, 106, 100, 0.15);
-  border-radius: 12px;
-  transition: background 150ms ease-out, transform 150ms ease-out;
-}
-
-.session-card:hover {
-  background: rgba(26, 24, 22, 0.7);
-}
-
-.session-card:active {
-  background: rgba(26, 24, 22, 0.7);
-  transform: scale(0.98);
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   NOISE OVERLAY — Enabled
+   ANIMATIONS — Minimal
    ═══════════════════════════════════════════════════════════════ */
 
-.noise-overlay {
-  position: absolute;
-  inset: 0;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   TECTONIC PULSE — Subtle, irregular, non-rhythmic
-   Like atmospheric pressure or slow tectonic movement
-   ═══════════════════════════════════════════════════════════════ */
-
-@keyframes tectonicPulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  23% {
-    transform: scale(1.008);
-    opacity: 0.98;
-  }
-  41% {
-    transform: scale(1.012);
-    opacity: 0.965;
-  }
-  58% {
-    transform: scale(0.995);
-    opacity: 0.985;
-  }
-  76% {
-    transform: scale(0.988);
-    opacity: 0.97;
-  }
-  89% {
-    transform: scale(1.003);
-    opacity: 0.99;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.tectonic-pulse {
-  animation: tectonicPulse 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  will-change: transform, opacity;
-}
-
-.tectonic-pulse.paused {
-  animation-play-state: paused;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

@@ -6,16 +6,11 @@ import { hapticTransition } from "@/lib/haptics";
 import { fadeIn, fadeOut } from "@/lib/audioFade";
 
 /**
- * SESSION PLAYER — Audio Playback Component
+ * SESSION PLAYER — Cosmic atmosphere
  *
- * Phases: ready → entering → pre-session → explanation → playing → paused → completing
- *
- * First-time users hear explanation audio before guided meditation.
- * Returning users skip directly to guided meditation.
- *
- * Parent controls:
- * - isActive(): Check if session is in progress
- * - endEarly(): Gracefully end session before completion
+ * FONT: Arimo only
+ * ORB: IdleOrb with structural rings
+ * MOOD: Deep space, distant light
  */
 
 const EXPLANATION_KEY = "idle_explanation_heard";
@@ -51,26 +46,19 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
   },
   ref
 ) {
-  // ═══════════════════════════════════════════════════════════════
-  // LOCAL STATE
-  // ═══════════════════════════════════════════════════════════════
-
   const [phase, setPhase] = useState<SessionPhase>('ready');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [audioReady, setAudioReady] = useState(false);
-  const [showStartPulse, setShowStartPulse] = useState(false);
   const [needsExplanation, setNeedsExplanation] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const explanationAudioRef = useRef<HTMLAudioElement | null>(null);
-  const hasStartedRef = useRef(false);
   const tickRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
   const audioUnlockedRef = useRef(false);
   const fadeCleanupRef = useRef<(() => void) | null>(null);
 
-  // Check if first-time user on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const heard = localStorage.getItem(EXPLANATION_KEY);
@@ -78,42 +66,14 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     }
   }, []);
 
-  // Derived values
   const remaining = Math.max(0, secondsTotal - elapsed);
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
-  const progress = Math.min(elapsed / secondsTotal, 1);
   const timeDisplay = `${mm}:${pad2(ss)}`;
-
-  // ═══════════════════════════════════════════════════════════════
-  // PHASE CHANGE NOTIFICATION
-  // ═══════════════════════════════════════════════════════════════
 
   useEffect(() => {
     onPhaseChange?.(phase);
   }, [phase, onPhaseChange]);
-
-  // ═══════════════════════════════════════════════════════════════
-  // SESSION START PULSE — Visual confirmation when session begins
-  // ═══════════════════════════════════════════════════════════════
-
-  useEffect(() => {
-    if (phase === 'playing' && !hasStartedRef.current) {
-      hasStartedRef.current = true;
-      setShowStartPulse(true);
-
-      // Remove pulse class after animation completes
-      const timer = setTimeout(() => {
-        setShowStartPulse(false);
-      }, 600);
-
-      return () => clearTimeout(timer);
-    }
-  }, [phase]);
-
-  // ═══════════════════════════════════════════════════════════════
-  // TICK — Updates elapsed time
-  // ═══════════════════════════════════════════════════════════════
 
   const clearTick = useCallback(() => {
     if (tickRef.current) {
@@ -131,13 +91,11 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       const t = Math.floor(a.currentTime || 0);
       setElapsed(t);
 
-      // Natural completion — gentle fade out
       if (t >= secondsTotal) {
         clearTick();
         setElapsed(secondsTotal);
         setPhase('completing');
 
-        // Fade out, silence, then complete
         fadeCleanupRef.current = fadeOut(a, 3000, 600, () => {
           if (mountedRef.current) {
             onComplete(secondsTotal, false);
@@ -147,10 +105,6 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     }, 250);
   }, [secondsTotal, clearTick, onComplete]);
 
-  // ═══════════════════════════════════════════════════════════════
-  // IMPERATIVE HANDLE
-  // ═══════════════════════════════════════════════════════════════
-
   useImperativeHandle(ref, () => ({
     isActive: () => phase === 'playing' || phase === 'paused' || phase === 'explanation',
     endEarly: () => {
@@ -158,19 +112,16 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       const explA = explanationAudioRef.current;
       clearTick();
 
-      // Cancel any ongoing fade
       if (fadeCleanupRef.current) {
         fadeCleanupRef.current();
         fadeCleanupRef.current = null;
       }
 
-      // Stop explanation audio if playing
       if (explA) {
         explA.pause();
       }
 
       if (a) {
-        // Gentle fade out, then silence, then complete
         setPhase('completing');
         fadeCleanupRef.current = fadeOut(a, 3000, 600, () => {
           if (mountedRef.current) {
@@ -184,14 +135,9 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     },
   }), [phase, elapsed, onComplete, clearTick]);
 
-  // ═══════════════════════════════════════════════════════════════
-  // AUDIO SETUP
-  // ═══════════════════════════════════════════════════════════════
-
   useEffect(() => {
     mountedRef.current = true;
 
-    // Main meditation audio
     const a = new Audio();
     (a as any).playsInline = true;
     (a as any).webkitPlaysInline = true;
@@ -199,7 +145,6 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     a.src = src;
     audioRef.current = a;
 
-    // Explanation audio (for first-time users)
     const explA = new Audio();
     (explA as any).playsInline = true;
     (explA as any).webkitPlaysInline = true;
@@ -239,7 +184,6 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       mountedRef.current = false;
       clearTick();
 
-      // Cancel any ongoing fade
       if (fadeCleanupRef.current) {
         fadeCleanupRef.current();
         fadeCleanupRef.current = null;
@@ -254,10 +198,6 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       explanationAudioRef.current = null;
     };
   }, [src, explanationSrc, clearTick, onComplete, secondsTotal]);
-
-  // ═══════════════════════════════════════════════════════════════
-  // PLAYBACK CONTROLS
-  // ═══════════════════════════════════════════════════════════════
 
   const unlockAudio = useCallback(async () => {
     const a = audioRef.current;
@@ -276,18 +216,15 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     }
   }, []);
 
-  // Start guided meditation (called after explanation or directly for returning users)
   const startMeditation = useCallback(async () => {
     const a = audioRef.current;
     if (!a || !mountedRef.current) return;
 
     try {
-      // Start at 0 volume for gentle fade-in
       a.volume = 0;
       await a.play();
       audioUnlockedRef.current = true;
 
-      // Gentle fade-in over 1500ms
       fadeCleanupRef.current = fadeIn(a, 0.8, 1500);
 
       setPhase('playing');
@@ -301,12 +238,10 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     }
   }, [startTick]);
 
-  // Play explanation audio for first-time users
   const startExplanation = useCallback(async () => {
     const explA = explanationAudioRef.current;
     if (!explA || !mountedRef.current) return;
 
-    // HARD LOCK: Mark as heard immediately (won't repeat even if user exits early)
     localStorage.setItem(EXPLANATION_KEY, 'true');
     setNeedsExplanation(false);
 
@@ -314,25 +249,21 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       explA.volume = 0;
       await explA.play();
 
-      // Gentle fade-in
       fadeCleanupRef.current = fadeIn(explA, 0.9, 1000);
 
       setPhase('explanation');
       hapticTransition();
 
-      // When explanation ends, gently transition to meditation
       explA.onended = () => {
         if (!mountedRef.current) return;
 
-        // Brief pause before meditation starts
         setTimeout(() => {
           if (mountedRef.current) {
             startMeditation();
           }
         }, 800);
       };
-    } catch (e: any) {
-      // If explanation fails, skip to meditation
+    } catch {
       startMeditation();
     }
   }, [startMeditation]);
@@ -344,25 +275,20 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
     setError(null);
 
     if (phase === 'ready') {
-      // Show entering animation
       setPhase('entering');
 
-      // Unlock for iOS
       if (!audioUnlockedRef.current) {
         await unlockAudio();
       }
 
-      // Brief delay for entering animation
       setTimeout(async () => {
         if (!mountedRef.current) return;
 
         setPhase('pre-session');
 
-        // Start playback after pre-session brief moment
         setTimeout(async () => {
           if (!mountedRef.current) return;
 
-          // First-time users hear explanation first
           if (needsExplanation) {
             startExplanation();
           } else {
@@ -372,7 +298,6 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
       }, 400);
 
     } else if (phase === 'playing') {
-      // Cancel any ongoing fade (e.g., fade-in)
       if (fadeCleanupRef.current) {
         fadeCleanupRef.current();
         fadeCleanupRef.current = null;
@@ -392,55 +317,62 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
   }, [phase, unlockAudio, startTick, clearTick, needsExplanation, startExplanation, startMeditation]);
 
   // ═══════════════════════════════════════════════════════════════
-  // RENDER
+  // RENDER — Cosmic atmosphere with distant glow
   // ═══════════════════════════════════════════════════════════════
 
-  const orbMode = phase === 'ready' || phase === 'entering' ? 'idle' : 'active';
   const showTime = phase === 'playing' || phase === 'paused';
-  const isExplanation = phase === 'explanation';
+
+  // Map session phases to orb modes
+  const getOrbMode = () => {
+    switch (phase) {
+      case 'entering':
+      case 'pre-session':
+        return 'entering';
+      case 'explanation':
+      case 'playing':
+        return 'active';
+      case 'completing':
+        return 'completing';
+      case 'paused':
+      case 'ready':
+      default:
+        return 'idle';
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] px-6">
-      {/* Session context */}
-      <div className="text-center mb-8">
-        {subtitle && (
-          <p
-            className="text-[10px] uppercase tracking-[0.2em]"
-            style={{ color: 'var(--muted)', opacity: 0.35 }}
-          >
-            {subtitle}
-          </p>
-        )}
-        <h1
-          className="mt-1 text-xl font-light"
-          style={{ color: 'var(--text)', opacity: 0.8 }}
-        >
-          {title}
-        </h1>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[500px] px-8">
+      {/* Session label */}
+      <p className="text-meta mb-10">{title}</p>
 
-      {/* Central orb */}
+      {/* Central pulse — tap target */}
       <button
         onClick={handleTap}
         disabled={(!audioReady && phase === 'ready') || phase === 'entering' || phase === 'completing' || phase === 'explanation'}
-        className={`relative transition-transform duration-200 active:scale-[0.98] disabled:opacity-40 ${showStartPulse ? 'session-start-pulse' : ''}`}
+        className="relative disabled:opacity-40"
+        style={{ transition: 'opacity 300ms ease' }}
         aria-label={phase === 'playing' ? "Pause" : "Play"}
       >
+        {/* IdleOrb — structural orbital rings */}
         <IdleOrb
-          mode={orbMode}
-          progress={progress}
+          size={260}
+          mode={getOrbMode()}
+          progress={elapsed / secondsTotal}
           timeDisplay={showTime ? timeDisplay : undefined}
-          size={280}
-          paused={phase === 'paused'}
         />
 
-        {/* Pause overlay */}
+        {/* Pause indicator */}
         {phase === 'paused' && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-black/30" />
-            <div className="relative flex gap-2">
-              <span className="block h-8 w-2.5 rounded bg-white/70" />
-              <span className="block h-8 w-2.5 rounded bg-white/70" />
+            <div className="flex gap-2.5 mt-16">
+              <span
+                className="block h-5 w-1.5 rounded-sm"
+                style={{ background: 'rgba(255, 255, 255, 0.35)' }}
+              />
+              <span
+                className="block h-5 w-1.5 rounded-sm"
+                style={{ background: 'rgba(255, 255, 255, 0.35)' }}
+              />
             </div>
           </div>
         )}
@@ -448,30 +380,30 @@ const SessionPlayer = forwardRef<SessionPlayerHandle, SessionPlayerProps>(functi
         {/* Play icon when ready */}
         {phase === 'ready' && audioReady && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="ml-2 h-0 w-0 border-y-[14px] border-y-transparent border-l-[22px] border-l-white/50" />
+            <div
+              className="ml-1 h-0 w-0 border-y-[8px] border-y-transparent border-l-[12px]"
+              style={{ borderLeftColor: 'rgba(255, 255, 255, 0.22)' }}
+            />
           </div>
         )}
       </button>
 
       {/* Status hint */}
       <p
-        className="mt-10 text-[11px] tracking-wide"
-        style={{ color: 'var(--muted)', opacity: 0.25 }}
+        className="mt-12 text-meta"
+        style={{ opacity: 0.28 }}
       >
-        {phase === 'ready' && audioReady && 'tap to begin'}
-        {phase === 'ready' && !audioReady && 'loading...'}
-        {phase === 'entering' && ''}
-        {phase === 'pre-session' && ''}
-        {phase === 'explanation' && ''}
-        {phase === 'paused' && 'tap to resume'}
-        {phase === 'playing' && 'tap to pause'}
+        {phase === 'ready' && audioReady && 'Begin'}
+        {phase === 'ready' && !audioReady && '...'}
+        {phase === 'paused' && 'Resume'}
+        {phase === 'playing' && 'Pause'}
       </p>
 
       {/* Error */}
       {error && (
         <p
-          className="mt-6 text-xs text-center"
-          style={{ color: 'rgba(255,180,180,0.9)' }}
+          className="mt-8 text-body text-center"
+          style={{ color: 'rgba(255, 180, 180, 0.6)' }}
         >
           {error}
         </p>
