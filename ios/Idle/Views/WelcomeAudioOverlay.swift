@@ -1,8 +1,10 @@
 import SwiftUI
 
+/// Welcome overlay with typewriter text synced to voiceover
+/// Auto-starts immediately, includes Skip button
 struct WelcomeAudioOverlay: View {
     @StateObject private var vm = WelcomeAudioViewModel(
-        audioFileName: "welcome",
+        audioFileName: "idle-welcome",
         lines: welcomeLines
     )
 
@@ -10,45 +12,54 @@ struct WelcomeAudioOverlay: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.85)
+            // Pure black background
+            Color.black
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Top label
+                Text("Welcome")
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.2)
+                    .textCase(.uppercase)
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.top, 56)
+                    .padding(.horizontal, 32)
+
                 Spacer()
 
-                Text(vm.displayedText.isEmpty ? "tap play to begin" : vm.displayedText)
-                    .font(.system(size: 18, design: .monospaced))
-                    .foregroundColor(.white)
+                // Typewriter text - centered vertically
+                Text(vm.displayedText)
+                    .font(.custom("IBM Plex Mono", size: 18))
+                    .foregroundColor(Color(red: 0.91, green: 0.93, blue: 0.96))
+                    .lineSpacing(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(24)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white.opacity(0.06))
-                    )
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 32)
 
                 Spacer()
 
-                if vm.displayedText.isEmpty {
-                    Button {
-                        vm.play()
-                    } label: {
-                        Text("Tap to listen")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 14)
-                            .background(Color.white)
-                            .cornerRadius(24)
-                    }
+                // Skip button
+                Button {
+                    vm.stop()
+                    UserDefaults.standard.hasSeenWelcomeAudio = true
+                    onFinished()
+                } label: {
+                    Text("Skip")
+                        .font(.system(size: 14, weight: .medium))
+                        .tracking(0.5)
+                        .foregroundColor(.white.opacity(0.5))
                 }
-
-                Spacer().frame(height: 40)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
             }
+        }
+        .onAppear {
+            // Auto-start immediately
+            vm.play()
         }
         .onChange(of: vm.finished) { finished in
             if finished {
-                withAnimation(.easeInOut(duration: 1.0)) {
+                withAnimation(.easeOut(duration: 0.6)) {
                     onFinished()
                 }
             }

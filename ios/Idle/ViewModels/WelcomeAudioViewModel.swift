@@ -17,11 +17,15 @@ final class WelcomeAudioViewModel: ObservableObject {
     init(audioFileName: String, lines: [TypedLine]) {
         self.lines = lines
 
+        // Configure audio session for playback
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+
         guard let url = Bundle.main.url(
             forResource: audioFileName,
             withExtension: "mp3"
         ) else {
-            print("❌ Audio file not found")
+            print("Audio file not found: \(audioFileName).mp3")
             return
         }
 
@@ -32,12 +36,18 @@ final class WelcomeAudioViewModel: ObservableObject {
     func play() {
         audioPlayer?.play()
 
-        // check audio time only to unlock typing
+        // Check audio time to unlock typing
         audioTimer = Timer.publish(every: 0.02, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.checkAudioTime()
             }
+    }
+
+    func stop() {
+        audioTimer?.cancel()
+        typingTimer?.cancel()
+        audioPlayer?.stop()
     }
 
     private func checkAudioTime() {
@@ -72,7 +82,8 @@ final class WelcomeAudioViewModel: ObservableObject {
                 self.displayedText.append(characters[self.currentCharIndex])
                 self.currentCharIndex += 1
             } else {
-                self.displayedText.append("\n")
+                // Add newlines between sentences
+                self.displayedText.append("\n\n")
                 self.currentCharIndex = 0
                 self.currentLineIndex += 1
                 self.typingTimer?.cancel()

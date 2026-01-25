@@ -1,32 +1,69 @@
 import Foundation
 import AVFoundation
+import Combine
 
 final class MeditationAudioCoordinator: NSObject, ObservableObject {
     @Published var isPlaying = false
     @Published var finished = false
+    @Published var elapsed: TimeInterval = 0
+    @Published var phase: Phase = .idle
+
+    enum Phase {
+        case idle
+        case entering
+        case explanation
+        case playing
+        case completing
+        case complete
+    }
 
     private var explanationPlayer: AVAudioPlayer?
     private var meditationPlayer: AVAudioPlayer?
+    private var progressTimer: AnyCancellable?
 
-    private enum Phase {
-        case idle
-        case explanation
-        case meditation
+    private let fadeInDuration: TimeInterval = 1.5
+    private let fadeOutDuration: TimeInterval = 3.0
+    private let fadeOutDelay: TimeInterval = 0.6
+    let sessionDuration: TimeInterval = 420 // 7 minutes
+
+    override init() {
+        super.init()
+        // Configure audio session
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
     }
-
-    private var phase: Phase = .idle
-
-    private let crossfadeDuration: TimeInterval = 3.0
-    private let endFadeDuration: TimeInterval = 8.0
-    private let silenceAfterEnd: TimeInterval = 3.0
 
     // MARK: - Entry
 
     func begin(playExplanation: Bool) {
-        if playExplanation {
-            playExplanationAudio()
+        phase = .entering
+
+        // Small delay for transition feel
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            if playExplanation {
+                self.playExplanationAudio()
+            } else {
+                self.playMeditation()
+            }
+        }
+    }
+
+    func endEarly() {
+        progressTimer?.cancel()
+        phase = .completing
+
+        if let player = meditationPlayer {
+            // Fade out over 3 seconds
+            player.setVolume(0.0, fadeDuration: fadeOutDuration)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + fadeOutDuration + fadeOutDelay) {
+                player.stop()
+                self.phase = .complete
+                self.finished = true
+            }
         } else {
-            playMeditation()
+            phase = .complete
+            finished = true
         }
     }
 
@@ -34,7 +71,7 @@ final class MeditationAudioCoordinator: NSObject, ObservableObject {
 
     private func playExplanationAudio() {
         guard let url = Bundle.main.url(
-            forResource: "explanation.slower",
+            forResource: "explanation",
             withExtension: "m4a"
         ) else {
             playMeditation()
@@ -43,8 +80,9 @@ final class MeditationAudioCoordinator: NSObject, ObservableObject {
 
         do {
             explanationPlayer = try AVAudioPlayer(contentsOf: url)
-            explanationPlayer?.volume = 1.0
+            explanationPlayer?.volume = 0.0
             explanationPlayer?.play()
+            explanationPlayer?.setVolume(0.9, fadeDuration: 1.0)
             phase = .explanation
             isPlaying = true
 
@@ -57,42 +95,53 @@ final class MeditationAudioCoordinator: NSObject, ObservableObject {
     private func scheduleCrossfadeToMeditation() {
         guard let explanationPlayer else { return }
 
-        let startTime = max(
-            0,
-            explanationPlayer.duration - crossfadeDuration
-        )
+        let crossfadeDuration: TimeInterval = 3.0
+        let startTime = max(0, explanationPlayer.duration - crossfadeDuration)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + startTime) {
             self.playMeditation(fadeIn: true)
-            explanationPlayer.setVolume(0.0, fadeDuration: self.crossfadeDuration)
+            explanationPlayer.setVolume(0.0, fadeDuration: crossfadeDuration)
         }
     }
 
     // MARK: - Meditation
 
     private func playMeditation(fadeIn: Bool = false) {
+        // Use the new finalaudioidle.mp3 file
         guard let url = Bundle.main.url(
-            forResource: "guided_session",
-            withExtension: "m4a"
+            forResource: "finalaudioidle",
+            withExtension: "mp3"
         ) else {
+            print("Audio file not found: finalaudioidle.mp3")
             return
         }
 
         do {
             meditationPlayer = try AVAudioPlayer(contentsOf: url)
-            meditationPlayer?.volume = fadeIn ? 0.0 : 1.0
+            meditationPlayer?.volume = fadeIn ? 0.0 : 0.0
             meditationPlayer?.play()
-            phase = .meditation
+            phase = .playing
             isPlaying = true
 
-            if fadeIn {
-                meditationPlayer?.setVolume(1.0, fadeDuration: crossfadeDuration)
-            }
+            // Fade in
+            meditationPlayer?.setVolume(0.8, fadeDuration: fadeInDuration)
 
+            startProgressTimer()
             scheduleEndFade()
         } catch {
-            return
+            print("Failed to play meditation audio: \(error)")
         }
+    }
+
+    // MARK: - Progress tracking
+
+    private func startProgressTimer() {
+        progressTimer = Timer.publish(every: 0.25, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self, let player = self.meditationPlayer else { return }
+                self.elapsed = min(player.currentTime, self.sessionDuration)
+            }
     }
 
     // MARK: - End handling
@@ -100,22 +149,34 @@ final class MeditationAudioCoordinator: NSObject, ObservableObject {
     private func scheduleEndFade() {
         guard let meditationPlayer else { return }
 
-        let fadeStart = max(
-            0,
-            meditationPlayer.duration - endFadeDuration
-        )
+        let fadeStart = max(0, sessionDuration - fadeOutDuration)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + fadeStart) {
-            meditationPlayer.setVolume(0.0, fadeDuration: self.endFadeDuration)
+            self.phase = .completing
+            meditationPlayer.setVolume(0.0, fadeDuration: self.fadeOutDuration)
         }
 
-        DispatchQueue.main.asyncAfter(
-            deadline: .now()
-                + meditationPlayer.duration
-                + silenceAfterEnd
-        ) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + self.sessionDuration + self.fadeOutDelay) {
+            self.progressTimer?.cancel()
+            meditationPlayer.stop()
             self.isPlaying = false
+            self.phase = .complete
             self.finished = true
         }
+    }
+
+    var remaining: TimeInterval {
+        max(0, sessionDuration - elapsed)
+    }
+
+    var progress: Double {
+        elapsed / sessionDuration
+    }
+
+    var timeDisplay: String {
+        let rem = Int(remaining)
+        let mm = rem / 60
+        let ss = rem % 60
+        return String(format: "%d:%02d", mm, ss)
     }
 }
