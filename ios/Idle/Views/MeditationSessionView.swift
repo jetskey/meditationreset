@@ -1,115 +1,84 @@
 import SwiftUI
+import AVFoundation
 
-/// Meditation session screen with orb visualization and timer
-/// Matches the web app's session/run/page.tsx
+/// Meditation session screen - matches web app
 struct MeditationSessionView: View {
     let playExplanation: Bool
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var audio = MeditationAudioCoordinator()
+    @StateObject private var audio = SessionAudioPlayer()
     @AppStorage("sessionsToday") private var sessionsToday: Int = 0
 
-    // Screen state
     @State private var showExit = false
-    @State private var exitTimer: Timer?
-    @State private var originalBrightness: CGFloat = UIScreen.main.brightness
-
-    private var orbMode: IdleOrbView.Mode {
-        switch audio.phase {
-        case .idle: return .idle
-        case .entering: return .entering
-        case .explanation, .playing: return .active
-        case .completing: return .completing
-        case .complete: return .complete
-        }
-    }
 
     var body: some View {
         ZStack {
+            // Black background
             Color.black.ignoresSafeArea()
 
-            if audio.phase == .complete {
-                // Completion state
+            if audio.isComplete {
                 completionView
             } else {
-                // Active session
                 sessionView
             }
         }
+        .navigationBarHidden(true)
         .onAppear {
-            setupSession()
+            UIApplication.shared.isIdleTimerDisabled = true
+            audio.begin(playExplanation: playExplanation)
         }
         .onDisappear {
-            cleanupSession()
+            UIApplication.shared.isIdleTimerDisabled = false
+            audio.stop()
         }
-        .onChange(of: audio.finished) { finished in
-            if finished {
-                // Record session
-                sessionsToday += 1
-            }
-        }
-        .gesture(
-            TapGesture()
-                .onEnded { _ in
-                    if audio.phase == .playing || audio.phase == .explanation {
-                        showExitButton()
-                    }
-                }
-        )
     }
-
-    // MARK: - Session View
 
     private var sessionView: some View {
         VStack(spacing: 0) {
             // Exit button
             HStack {
                 Button {
-                    audio.endEarly()
+                    sessionsToday += 1
+                    audio.stop()
+                    dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .regular))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 20))
+                        .foregroundColor(.white.opacity(showExit ? 0.5 : 0.15))
                 }
-                .opacity(exitOpacity)
-                .animation(.easeOut(duration: 0.3), value: showExit)
-
                 Spacer()
             }
             .padding(.horizontal, 32)
-            .padding(.top, 64)
+            .padding(.top, 60)
 
             Spacer()
 
             // Session label
-            Text("Session")
+            Text("SESSION")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.5)
-                .textCase(.uppercase)
                 .foregroundColor(.white.opacity(0.35))
                 .padding(.bottom, 40)
 
-            // Orb with time display
+            // Orb with time
             IdleOrbView(
-                mode: orbMode,
+                mode: .active,
                 progress: audio.progress,
-                timeDisplay: showTime ? audio.timeDisplay : nil,
+                timeDisplay: audio.timeDisplay,
                 size: 260
             )
 
             Spacer()
-
-            // Status hint
-            Text(statusHint)
-                .font(.system(size: 11, weight: .medium))
-                .tracking(1.5)
-                .textCase(.uppercase)
-                .foregroundColor(.white.opacity(0.28))
-                .padding(.bottom, 60)
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showExit = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                showExit = false
+            }
         }
     }
-
-    // MARK: - Completion View
 
     private var completionView: some View {
         VStack(spacing: 0) {
@@ -118,99 +87,129 @@ struct MeditationSessionView: View {
             IdleOrbView(mode: .complete, size: 180)
                 .padding(.bottom, 48)
 
-            Text("+\(formatTime(Int(audio.elapsed)))")
+            Text("+\(formatTime(audio.elapsedSeconds))")
                 .font(.system(size: 48, weight: .medium))
-                .tracking(-1)
                 .monospacedDigit()
                 .foregroundColor(.white.opacity(0.85))
 
             Text("Complete.")
-                .font(.system(size: 15, weight: .regular))
+                .font(.system(size: 15))
                 .foregroundColor(.white.opacity(0.6))
                 .padding(.top, 16)
 
             Spacer()
 
-            Text("tap to continue")
+            Text("TAP TO CONTINUE")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.5)
-                .textCase(.uppercase)
                 .foregroundColor(.white.opacity(0.25))
                 .padding(.bottom, 60)
         }
         .contentShape(Rectangle())
         .onTapGesture {
+            sessionsToday += 1
             dismiss()
         }
         .onAppear {
-            // Auto-dismiss after 4 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                sessionsToday += 1
                 dismiss()
             }
         }
     }
 
-    // MARK: - Helpers
-
-    private var exitOpacity: Double {
-        switch audio.phase {
-        case .entering: return 0.1
-        case .playing, .explanation:
-            return showExit ? 0.5 : 0.15
-        default: return 0.1
-        }
-    }
-
-    private var showTime: Bool {
-        audio.phase == .playing || audio.phase == .completing
-    }
-
-    private var statusHint: String {
-        switch audio.phase {
-        case .idle, .entering: return ""
-        case .explanation: return "Listen"
-        case .playing: return ""
-        case .completing: return ""
-        case .complete: return ""
-        }
-    }
-
     private func formatTime(_ seconds: Int) -> String {
-        let mins = seconds / 60
-        let secs = seconds % 60
-        if mins == 0 { return "\(secs)s" }
-        if secs == 0 { return "\(mins) min" }
-        return String(format: "%d:%02d", mins, secs)
-    }
-
-    private func showExitButton() {
-        showExit = true
-        exitTimer?.invalidate()
-        exitTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { _ in
-            showExit = false
-        }
-    }
-
-    private func setupSession() {
-        // Prevent auto-lock
-        UIApplication.shared.isIdleTimerDisabled = true
-
-        // Lock minimum brightness
-        originalBrightness = UIScreen.main.brightness
-        UIScreen.main.brightness = max(originalBrightness, 0.15)
-
-        // Start audio
-        audio.begin(playExplanation: playExplanation)
-    }
-
-    private func cleanupSession() {
-        UIApplication.shared.isIdleTimerDisabled = false
-        UIScreen.main.brightness = originalBrightness
-        exitTimer?.invalidate()
+        let m = seconds / 60
+        let s = seconds % 60
+        if m == 0 { return "\(s)s" }
+        if s == 0 { return "\(m) min" }
+        return "\(m):\(String(format: "%02d", s))"
     }
 }
 
-#Preview {
-    MeditationSessionView(playExplanation: false)
-        .preferredColorScheme(.dark)
+// Session audio player
+class SessionAudioPlayer: ObservableObject {
+    @Published var progress: Double = 0
+    @Published var timeDisplay: String = "7:00"
+    @Published var elapsedSeconds: Int = 0
+    @Published var isComplete: Bool = false
+
+    private var player: AVAudioPlayer?
+    private var timer: Timer?
+    private let duration: Double = 420 // 7 minutes
+
+    init() {
+        try? AVAudioSession.sharedInstance().setCategory(.playback)
+        try? AVAudioSession.sharedInstance().setActive(true)
+    }
+
+    func begin(playExplanation: Bool) {
+        // For now, skip explanation and go straight to meditation
+        if let url = Bundle.main.url(forResource: "finalaudioidle", withExtension: "mp3") {
+            player = try? AVAudioPlayer(contentsOf: url)
+            player?.volume = 0
+            player?.play()
+
+            // Fade in
+            Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] timer in
+                guard let self = self, let player = self.player else {
+                    timer.invalidate()
+                    return
+                }
+                if player.volume < 0.8 {
+                    player.volume += 0.02
+                } else {
+                    timer.invalidate()
+                }
+            }
+
+            startProgressTimer()
+        }
+    }
+
+    func stop() {
+        timer?.invalidate()
+        player?.stop()
+    }
+
+    private func startProgressTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+            self?.updateProgress()
+        }
+    }
+
+    private func updateProgress() {
+        guard let player = player else { return }
+
+        let current = min(player.currentTime, duration)
+        let remaining = max(0, duration - current)
+
+        elapsedSeconds = Int(current)
+        progress = current / duration
+
+        let m = Int(remaining) / 60
+        let s = Int(remaining) % 60
+        timeDisplay = "\(m):\(String(format: "%02d", s))"
+
+        if current >= duration || !player.isPlaying {
+            timer?.invalidate()
+
+            // Fade out
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+                guard let self = self, let player = self.player else {
+                    timer.invalidate()
+                    return
+                }
+                if player.volume > 0.05 {
+                    player.volume -= 0.05
+                } else {
+                    player.stop()
+                    timer.invalidate()
+                    DispatchQueue.main.async {
+                        self.isComplete = true
+                    }
+                }
+            }
+        }
+    }
 }
